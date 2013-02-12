@@ -1,4 +1,9 @@
-from configparser import ConfigParser
+try:
+    from ConfigParser import ConfigParser
+except ImportError:
+    # Python 3.x
+    from configparser import ConfigParser
+
 
 CONFIG_FILE = "./conviron.ini"  # Default file name
 
