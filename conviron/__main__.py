@@ -6,7 +6,9 @@ from conviron import get_config
 
 
 def communicate_line(line):
-    """This processes each line, and """
+    """This processes each line, and handles any errors which they create
+    elegantly.
+    """
     print("Communicating:", line)
 
 
