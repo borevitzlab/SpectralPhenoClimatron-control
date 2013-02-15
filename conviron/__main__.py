@@ -2,6 +2,7 @@ from __future__ import print_function
 from time import strptime, sleep, mktime, time
 import datetime
 import csv
+import socket
 from conviron import (
         get_config,
         chamber,
@@ -14,8 +15,12 @@ def communicate_line(line):
     elegantly.
     """
     print("Communicating:", line)
-    chamber.communicate(line)
-    
+    try:
+        chamber.communicate(line)
+    except (OSError, EOFError, socket.error) as e:
+        print(e)
+        # TODO: email error
+
 
 
 def main():
@@ -23,7 +28,7 @@ def main():
     processed to communicate_line()
     """
     config = get_config()
-   
+
     # open the CSV file, and make the csv reader
     csv_fh = open(config.get("Global", "CsvFilePath"))
     csv_reader = csv.reader(csv_fh, delimiter=',',
@@ -77,16 +82,13 @@ def main():
         except StopIteration:
             raise ValueError(
                     "No date in the CSV file matches the current time."
-                    )       
+                    )
         date_time = line[datefield] + " " + line[timefield]
         first_time = datetime.datetime.fromtimestamp(
                 mktime(strptime(
                     date_time, config.get("Global", "CsvDateFormat")
                     ))
                 )
-    
-    if config.getboolean("Global", "Debug"):
-        print(line)
 
     # Run the first line
     communicate_line(line)

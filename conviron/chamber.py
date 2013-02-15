@@ -9,54 +9,44 @@ config = get_config()
 
 
 def _run(telnet, commands):
+    response = b''
     for command in commands:
         if config.getboolean("Global", "Debug"):
-            print(command)
-        tries = 3
-        while tries > 0:
-            try:
-                telnet.write(command)
-                break
-            except:
-                tries -= 1
-        if tries < 1:
-            # email errord
-            pass
-            # return some error message which means skip to the next timepoint
-            # after waiting
-    response = telnet.read_some()
-    if config.getboolean("Global", "Debug"):
-       print(response)        
-
+            print("Sending command: ", command.decode())
+        telnet.write(command)
+        this_response = telnet.read_some()
+        if config.getboolean("Global", "Debug"):
+            print("Received: ", this_response.decode())
+    return response
 
 def communicate(line):
     cmd_str = "%s %s " % (
             config.get("Conviron", "SetCommand"),
             config.get("Conviron", "DeviceID")
             )
-    
+
     # # We do the login manually # #
     # Establish connection
     telnet = Telnet(config.get("Conviron","Host"))
     response = telnet.read_until(b"login: ")
     if config.getboolean("Global", "Debug") > 0:
-        print(response)
-    
+        print(response.decode())
+
     # Username
     payload = bytes(config.get("Conviron", "User") + "\n", encoding="UTF8")
     telnet.write(payload)
     response = telnet.read_until(b"Password: ")
     if config.getboolean("Global", "Debug") > 0:
-        print(payload)
-        print(response)
-    
+        print(payload.decode())
+        print(response.decode())
+
     # Password
     payload = bytes(config.get("Conviron", "Password") + "\n", encoding="UTF8")
     telnet.write(payload)
     response = telnet.read_until(b"#")
     if config.getboolean("Global", "Debug") > 0:
-        print(payload)
-        print(response)
+        print(payload.decode())
+        print(response.decode())
 
     # Make list for the "Set" part of the communication
     # Append init commands to command list
@@ -128,4 +118,3 @@ def communicate(line):
 
     # Close telnet session
     telnet.close()
-   
