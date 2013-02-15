@@ -49,7 +49,6 @@ def main():
     datefield = config.getint("GlobalCsvFields", "Date")
     timefield = config.getint("GlobalCsvFields", "Time")
 
-
     # Detect if the file has a header, by trying to get a date and time from
     # the first two field of the first row.
     try:
@@ -85,7 +84,7 @@ def main():
     # Check if file starts too far into the future
     if first_time > now + timedelta:
         raise ValueError("The file starts too far into the future.")
-    line = [] # Make the line variable local to the main() function
+    line = []  # Make the line variable local to the main() function
 
     # Read through the file to find the current date and time
     while not first_time < now < first_time + timedelta:

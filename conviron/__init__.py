@@ -2,8 +2,9 @@ from configparser import ConfigParser
 import sys
 import os
 
-
 CONFIG_FILE = "./conviron.ini"  # Default file name
+
+
 def get_config():
     """Returns a ConfigParser which has read the given filename. If filename is
     not given, uses CONFIG_FILE."""

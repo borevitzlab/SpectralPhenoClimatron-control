@@ -14,14 +14,14 @@ def communicate(line):
 
     # # We do the login manually # #
     # Establish connection
-    telnet = Telnet(config.get("Heliospectra","MasterHost"),
+    telnet = Telnet(config.get("Heliospectra", "MasterHost"),
             port=config.getint("Heliospectra", "MasterPort"))
     response = telnet.read_until(b">")
     if config.getboolean("Global", "Debug") > 0:
         print("Intial response is:", response.decode())
 
     wavelengths = [s.strip() for s in
-            config.get("Heliospectra","Wavelengths").split(",")]
+            config.get("Heliospectra", "Wavelengths").split(",")]
 
     intensities = []
     for wl in sorted(wavelengths):
