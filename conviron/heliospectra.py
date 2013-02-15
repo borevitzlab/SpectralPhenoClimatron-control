@@ -25,26 +25,28 @@ def communicate(line):
             config.get("Heliospectra","Wavelengths").split(",")]
 
     intensities = []
-    for wl in wavelengths:
+    for wl in sorted(wavelengths):
         intensity = float(line[config.getint("HeliospectraCsvFields", wl)])
         # Solarcalc gives percentages, telnet wants value in 0-255
         intensity = int(round(intensity * 2.55))
-        intensities[wl] = intensity
+        intensities.append((wl, intensity))
 
+    intensities = sorted(intensities)
     if config.getboolean("Global", "Debug"):
         print(intensities)
 
-    set_cmd = config.get("Heliospecta", "SetWlsRelPowerCommand")
+    set_cmd = config.get("Heliospectra", "SetallWlCommand")
 
     command_line = bytes("%s %s\n" % (
                 set_cmd,
-                " ".join("%i" for intensity in intensities.values())
+                " ".join("%i" % itn for _, itn in intensities)
                 ),
             encoding="UTF8"
             )
 
     if config.getboolean("Global", "Debug"):
-        print(commandline.decode())
+        print(command_line.decode())
+    telnet.write(command_line)
 
     response = telnet.read_some()
     if config.getboolean("Global", "Debug"):
