@@ -15,7 +15,7 @@ def _run(telnet, commands):
         tries = 3
         while tries > 0:
             try:
-                #telnet.write(command)
+                telnet.write(command)
                 break
             except:
                 tries -= 1
