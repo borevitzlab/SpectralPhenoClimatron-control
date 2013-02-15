@@ -1,8 +1,6 @@
-from __future__ import print_function
 from telnetlib import Telnet
 from conviron import get_config
 import datetime
-import re
 from time import sleep
 
 config = get_config()

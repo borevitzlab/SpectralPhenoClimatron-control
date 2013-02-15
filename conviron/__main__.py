@@ -1,4 +1,3 @@
-from __future__ import print_function
 from time import strptime, sleep, mktime, time
 import datetime
 import csv

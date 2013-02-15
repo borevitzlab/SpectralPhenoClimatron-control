@@ -1,8 +1,4 @@
-try:
-    from ConfigParser import ConfigParser
-except ImportError:
-    # Python 3.x
-    from configparser import ConfigParser
+from configparser import ConfigParser
 import sys
 import os
 
