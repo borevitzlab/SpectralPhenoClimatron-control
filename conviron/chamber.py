@@ -1,8 +1,5 @@
-from __future__ import print_function
 from telnetlib import Telnet
 from conviron import get_config
-import datetime
-import re
 from time import sleep
 
 config = get_config()
@@ -19,6 +16,7 @@ def _run(telnet, commands):
             print("Received: ", this_response.decode())
     return response
 
+
 def communicate(line):
     cmd_str = "%s %s " % (
             config.get("Conviron", "SetCommand"),
@@ -27,7 +25,7 @@ def communicate(line):
 
     # # We do the login manually # #
     # Establish connection
-    telnet = Telnet(config.get("Conviron","Host"))
+    telnet = Telnet(config.get("Conviron", "Host"))
     response = telnet.read_until(b"login: ")
     if config.getboolean("Global", "Debug") > 0:
         print("Initial response is:", response.decode())
@@ -55,14 +53,14 @@ def communicate(line):
             for params in config.get("Conviron", "InitSequence").split(",")
             ]
     # Append temp command to list
-    command_list.append(bytes("%s %s %i %i\n" %(
+    command_list.append(bytes("%s %s %i %i\n" % (
         cmd_str,
         config.get("ConvironDataTypes", "Temperature"),
         config.getint("ConvironDataIndicies", "Temperature"),
         int(float(line[config.getint("GlobalCsvFields", "Temperature")]) * 10)
         ), encoding="UTF8"))
     # Append humidity command to list
-    command_list.append(bytes("%s %s %i %i\n" %(
+    command_list.append(bytes("%s %s %i %i\n" % (
         cmd_str,
         config.get("ConvironDataTypes", "Humidity"),
         config.getint("ConvironDataIndicies", "Humidity"),
@@ -70,12 +68,12 @@ def communicate(line):
         ), encoding="UTF8"))
     if config.getboolean("Conviron", "UseInternalLights"):
         # Append light1 command to list
-        command_list.append(bytes("%s %s %i %i\n" %(
+        command_list.append(bytes("%s %s %i %i\n" % (
             cmd_str,
             config.get("ConvironDataTypes", "Light1"),
             config.getint("ConvironDataIndicies", "Light1"),
             int(line[config.getint("ConvironCsvFields", "Light1")])
-            ), encoding="UTF8")) 
+            ), encoding="UTF8"))
     # Append teardown commands to command list
     for params in config.get("Conviron", "TearDownSequence").split(","):
         command_list.append(bytes(cmd_str + params + "\n", encoding="UTF8"))
