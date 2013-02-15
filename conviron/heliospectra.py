@@ -1,17 +1,10 @@
 from telnetlib import Telnet
 from conviron import get_config
-import datetime
-from time import sleep
 
 config = get_config()
 
 
 def communicate(line):
-    cmd_str = "%s %s " % (
-            config.get("Conviron", "SetCommand"),
-            config.get("Conviron", "DeviceID")
-            )
-
     # # We do the login manually # #
     # Establish connection
     telnet = Telnet(config.get("Heliospectra", "MasterHost"),

@@ -1,6 +1,5 @@
 from telnetlib import Telnet
 from conviron import get_config
-import datetime
 from time import sleep
 
 config = get_config()
