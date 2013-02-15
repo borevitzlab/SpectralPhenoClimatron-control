@@ -19,7 +19,7 @@ def communicate(line):
             port=config.getint("Heliospectra", "MasterPort"))
     response = telnet.read_until(b">")
     if config.getboolean("Global", "Debug") > 0:
-        print(response.decode())
+        print("Intial response is:", response.decode())
 
     wavelengths = [s.strip() for s in
             config.get("Heliospectra","Wavelengths").split(",")]
@@ -33,7 +33,7 @@ def communicate(line):
 
     intensities = sorted(intensities)
     if config.getboolean("Global", "Debug"):
-        print(intensities)
+        print("Intensity list is:", intensities)
 
     set_cmd = config.get("Heliospectra", "SetallWlCommand")
 
@@ -45,12 +45,12 @@ def communicate(line):
             )
 
     if config.getboolean("Global", "Debug"):
-        print(command_line.decode())
+        print("Running:", command_line.decode())
     telnet.write(command_line)
 
     response = telnet.read_some()
     if config.getboolean("Global", "Debug"):
-        print(response.decode())
+        print("Response is:", response.decode())
 
     # Close telnet session
     telnet.close()
