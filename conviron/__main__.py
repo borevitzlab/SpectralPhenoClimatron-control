@@ -6,8 +6,10 @@ import socket
 from conviron import (
         get_config,
         chamber,
-        #heliospectra,
+        heliospectra,
         )
+
+config = get_config()
 
 
 def communicate_line(line):
@@ -16,7 +18,10 @@ def communicate_line(line):
     """
     print("Communicating:", line)
     try:
-        chamber.communicate(line)
+        if config.getboolean("Conviron", "Use"):
+            chamber.communicate(line)
+        if config.getboolean("Heliospectra", "Use"):
+            heliospectra.communicate(line)
     except (OSError, EOFError, socket.error) as e:
         print(e)
         # TODO: email error
@@ -27,7 +32,6 @@ def main():
     """Main event loop. This just handles the files, and passes lines to be
     processed to communicate_line()
     """
-    config = get_config()
 
     # open the CSV file, and make the csv reader
     csv_fh = open(config.get("Global", "CsvFilePath"))
