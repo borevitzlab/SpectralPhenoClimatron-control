@@ -3,11 +3,14 @@ from time import strptime, sleep, mktime, time
 import datetime
 import csv
 import socket
+import sys
 from conviron import (
         get_config,
         chamber,
         heliospectra,
         )
+
+timepoint_count = 0
 
 config = get_config()
 
@@ -16,16 +19,22 @@ def communicate_line(line):
     """This processes each line, and handles any errors which they create
     elegantly.
     """
-    print("Communicating:", line)
+    global timepoint_count
+    timepoint_count += 1
+    if config.getboolean("Global", "Debug"):
+        print("Csv line is:", line)
+    now = datetime.datetime.now()
+    print("Running timepoint %i at %s" % (timepoint_count, now), end='... ')
+    sys.stdout.flush()  # flush to force buffering, so above is printed
     try:
         if config.getboolean("Conviron", "Use"):
             chamber.communicate(line)
         if config.getboolean("Heliospectra", "Use"):
             heliospectra.communicate(line)
     except (OSError, EOFError, socket.error) as e:
-        print(e)
+        print("\n", e)  # print it on a new line
         # TODO: email error
-
+    print("Success")
 
 
 def main():
@@ -67,7 +76,7 @@ def main():
                     ))
                 )
     if config.getboolean("Global", "Debug"):
-        print(first_time)
+        print("First time in file is:", first_time)
 
     ## Find current time in CSV file ##
     now = datetime.datetime.now()
