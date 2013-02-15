@@ -12,7 +12,6 @@ def _run(telnet, commands):
     for command in commands:
         if config.getboolean("Global", "Debug"):
             print(command)
-        next
         tries = 3
         while tries > 0:
             try:
@@ -35,7 +34,7 @@ def communicate(line):
             config.get("Conviron", "SetCommand"),
             config.get("Conviron", "DeviceID")
             )
-    telnet = None
+    
     # # We do the login manually # #
     # Establish connection
     telnet = Telnet(config.get("Conviron","Host"))
@@ -61,7 +60,6 @@ def communicate(line):
 
     # Make list for the "Set" part of the communication
     # Append init commands to command list
-    print(config.get("Conviron", "InitSequence").split(","))
     command_list = [
             bytes(cmd_str + params + "\n", encoding="UTF8")
             for params in config.get("Conviron", "InitSequence").split(",")
