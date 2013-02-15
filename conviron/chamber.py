@@ -39,13 +39,9 @@ def communicate(line):
     # # We do the login manually # #
     # Establish connection
     telnet = Telnet(config.get("Conviron","Host"))
-    response = telnet.read_some()
+    response = telnet.read_until(b"login: ")
     if config.getboolean("Global", "Debug") > 0:
         print(response)
-
-    # check response for login
-    #if re.search(b"login: ", response) is None:
-    #    raise RuntimeError("Did not receive login prompt")
     
     # Username
     payload = bytes(config.get("Conviron", "User") + "\n", encoding="UTF8")
