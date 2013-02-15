@@ -2,7 +2,11 @@ from __future__ import print_function
 from time import strptime, sleep, mktime, time
 import datetime
 import csv
-from conviron import get_config
+from conviron import (
+        get_config,
+        chamber,
+        #heliospectra,
+        )
 
 
 def communicate_line(line):
@@ -10,6 +14,8 @@ def communicate_line(line):
     elegantly.
     """
     print("Communicating:", line)
+    chamber.communicate(line)
+    
 
 
 def main():
