@@ -30,23 +30,23 @@ def communicate(line):
     telnet = Telnet(config.get("Conviron","Host"))
     response = telnet.read_until(b"login: ")
     if config.getboolean("Global", "Debug") > 0:
-        print(response.decode())
+        print("Initial response is:", response.decode())
 
     # Username
     payload = bytes(config.get("Conviron", "User") + "\n", encoding="UTF8")
     telnet.write(payload)
     response = telnet.read_until(b"Password: ")
     if config.getboolean("Global", "Debug") > 0:
-        print(payload.decode())
-        print(response.decode())
+        print("Sent username:", payload.decode())
+        print("Received:", response.decode())
 
     # Password
     payload = bytes(config.get("Conviron", "Password") + "\n", encoding="UTF8")
     telnet.write(payload)
     response = telnet.read_until(b"#")
     if config.getboolean("Global", "Debug") > 0:
-        print(payload.decode())
-        print(response.decode())
+        print("Send password:", payload.decode())
+        print("Received:", response.decode())
 
     # Make list for the "Set" part of the communication
     # Append init commands to command list
