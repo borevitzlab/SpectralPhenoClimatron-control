@@ -107,7 +107,7 @@ def main():
         wait_sec = timediff.days * 24 * 60 * 60 + timediff.seconds
         if config.getboolean("Global", "Debug"):
             print("Waiting %i secs." % wait_sec)
-        #sleep(wait_sec)
+        sleep(wait_sec)
         communicate_line(line)
         previous_time = time
 
