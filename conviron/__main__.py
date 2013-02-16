@@ -3,6 +3,7 @@ import datetime
 import csv
 import socket
 import sys
+import time
 from conviron import (
         get_config,
         chamber,
@@ -102,24 +103,29 @@ def main():
                 )
 
     # Run the first line
+    prev_run_length = 0
+    start = time.time()
     communicate_line(line)
+    prev_run_length = time.time() - start
     previous_time = first_time
 
     # Loop through the rest of the lines, running each one
     for line in csv_reader:
         date_time = line[datefield] + " " + line[timefield]
-        time = datetime.datetime.fromtimestamp(
+        csv_time = datetime.datetime.fromtimestamp(
                 mktime(strptime(
                     date_time,
                     config.get("Global", "CsvDateFormat")
                     ))
                 )
-        timediff = time - previous_time
-        wait_sec = timediff.days * 24 * 60 * 60 + timediff.seconds
+        diff = csv_time - previous_time 
+        wait_sec = diff.days * 24 * 60 * 60 + diff.seconds - prev_run_length
         if config.getboolean("Global", "Debug"):
             print("Waiting %i secs." % wait_sec)
         sleep(wait_sec)
+        start = time.time()
         communicate_line(line)
-        previous_time = time
+        prev_run_length = time.time() - start
+        previous_time = csv_time
 
 main()
