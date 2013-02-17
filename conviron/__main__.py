@@ -5,6 +5,9 @@ import socket
 import sys
 import time
 import traceback
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+import smtplib
 from conviron import (
         get_config,
         chamber,
@@ -14,6 +17,33 @@ from conviron import (
 timepoint_count = 0
 
 config = get_config()
+
+def _email_traceback(traceback):
+    """Borrows heavily from http://kutuma.blogspot.com.au/2007/08/
+    sending-emails-via-gmail-with-python.html
+    """
+    print("Sending email %s" % traceback)
+    msg = MIMEMultipart()
+    msg["From"] = config.get("Global", "GmailUser")
+    msg["To"] = config.get("Global", "EmailRecipient")
+    msg["Subject"] = "Conviron Error!"
+
+    msg.attach(MIMEText(traceback))
+
+    gmail = smtplib.SMTP("smtp.gmail.com", 587)
+    gmail.ehlo()
+    gmail.starttls()
+    gmail.ehlo()
+    gmail.login(
+            config.get("Global", "GmailUser"),
+            config.get("Global", "GmailPass")
+            )
+    gmail.sendmail(
+            config.get("Global", "GmailUser"),
+            config.get("Global", "EmailRecipient"),
+            msg.as_string()
+            )
+    gmail.close()
 
 
 def communicate_line(line):
@@ -37,6 +67,8 @@ def communicate_line(line):
         print("FAIL")
         if config.getboolean("Global", "Debug"):
             traceback.print_exception(*sys.exc_info())
+        traceback_text = traceback.format_exc()
+        _email_traceback(traceback_text)
         # TODO: email error
 
 
