@@ -122,7 +122,10 @@ def main():
                     ))
                 )
         diff = csv_time - previous_time 
-        wait_sec = diff.days * 24 * 60 * 60 + diff.seconds - prev_run_length
+        wait_sec = max(
+                diff.days * 24 * 60 * 60 + diff.seconds - prev_run_length,
+                0  # We don't want to wait a negative number of seconds
+                )
         if config.getboolean("Global", "Debug"):
             print("Waiting %i secs." % wait_sec)
         sleep(wait_sec)
