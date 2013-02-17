@@ -4,6 +4,7 @@ import csv
 import socket
 import sys
 import time
+import traceback
 from conviron import (
         get_config,
         chamber,
@@ -31,10 +32,12 @@ def communicate_line(line):
             chamber.communicate(line)
         if config.getboolean("Heliospectra", "Use"):
             heliospectra.communicate(line)
+        print("Success")
     except (OSError, EOFError, socket.error) as e:
-        print("\n", e)  # print it on a new line
+        print("FAIL")
+        if config.getboolean("Global", "Debug"):
+            traceback.print_exception(*sys.exc_info())
         # TODO: email error
-    print("Success")
 
 
 def main():
