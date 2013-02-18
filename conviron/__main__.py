@@ -22,7 +22,6 @@ def _email_traceback(traceback):
     """Borrows heavily from http://kutuma.blogspot.com.au/2007/08/
     sending-emails-via-gmail-with-python.html
     """
-    print("Sending email %s" % traceback)
     msg = MIMEMultipart()
     msg["From"] = config.get("Global", "GmailUser")
     msg["To"] = config.get("Global", "EmailRecipient")
@@ -60,6 +59,7 @@ def _log_to_postgres(log_tuple):
     cur = con.cursor()
     statement = config.get("Postgres", "InsertStatement")
     cur.execute(statement, log_tuple)
+    con.commit()
     cur.close()
     con.close()
 
@@ -75,7 +75,7 @@ def communicate_line(line):
     now = datetime.datetime.now()
     log_str = "Running timepoint %i at %s" % (timepoint_count, now)
     print(log_str, end='... ')
-    chamber = config.get("Global", "Chamber")
+    chamber_num = config.get("Global", "Chamber")
     sys.stdout.flush()  # flush to force buffering, so above is printed
     try:
         if config.getboolean("Conviron", "Use"):
@@ -83,14 +83,14 @@ def communicate_line(line):
         if config.getboolean("Heliospectra", "Use"):
             heliospectra.communicate(line)
         print("Success")
-        log_tuple = (chamber, "FALSE", log_str)
+        log_tuple = (chamber_num, "FALSE", log_str)
     except (OSError, EOFError, socket.error) as e:
         print("FAIL")
         if config.getboolean("Global", "Debug"):
             traceback.print_exception(*sys.exc_info())
         traceback_text = traceback.format_exc()
         _email_traceback(traceback_text)
-        log_tuple = (chamber, "TRUE", "%s\n%s" % (log_str, traceback_text))
+        log_tuple = (chamber_num, "TRUE", "%s\n%s" % (log_str, traceback_text))
     _log_to_postgres(log_tuple)
 
 
