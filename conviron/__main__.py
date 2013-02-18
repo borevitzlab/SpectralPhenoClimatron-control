@@ -22,12 +22,17 @@ def _email_traceback(traceback):
     """Borrows heavily from http://kutuma.blogspot.com.au/2007/08/
     sending-emails-via-gmail-with-python.html
     """
+    message_text = "Error on chamber %i\n" % config.getint(
+            "Global", "Chamber")
+    message_text += traceback
+
     msg = MIMEMultipart()
     msg["From"] = config.get("Global", "GmailUser")
     msg["To"] = config.get("Global", "EmailRecipient")
-    msg["Subject"] = "Conviron Error!"
+    msg["Subject"] = "Conviron Error (Chamber %i)" % \
+            config.getint("Global", "Chamber")
 
-    msg.attach(MIMEText(traceback))
+    msg.attach(MIMEText(message_text))
 
     gmail = smtplib.SMTP("smtp.gmail.com", 587)
     gmail.ehlo()
