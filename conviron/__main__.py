@@ -58,8 +58,8 @@ def _log_to_postgres(log_tuple):
             password=config.get("Postgres", "Pass"),
             )
     cur = con.cursor()
-    statement = config.get("Postgres", "InsertStatement").format(*log_tuple)
-    cur.execute(statement)
+    statement = config.get("Postgres", "InsertStatement")
+    cur.execute(statement, log_tuple)
     cur.close()
     con.close()
 
