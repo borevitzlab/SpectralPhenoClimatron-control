@@ -5,6 +5,9 @@ import socket
 import sys
 import time
 import traceback
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+import smtplib
 from conviron import (
         get_config,
         chamber,
@@ -14,6 +17,56 @@ from conviron import (
 timepoint_count = 0
 
 config = get_config()
+
+def _email_traceback(traceback):
+    """Borrows heavily from http://kutuma.blogspot.com.au/2007/08/
+    sending-emails-via-gmail-with-python.html
+    """
+    message_text = "Error on chamber %i\n" % config.getint(
+            "Global", "Chamber")
+    message_text += traceback
+
+    msg = MIMEMultipart()
+    msg["From"] = config.get("Global", "GmailUser")
+    msg["To"] = config.get("Global", "EmailRecipient")
+    msg["Subject"] = "Conviron Error (Chamber %i)" % \
+            config.getint("Global", "Chamber")
+
+    msg.attach(MIMEText(message_text))
+
+    gmail = smtplib.SMTP("smtp.gmail.com", 587)
+    gmail.ehlo()
+    gmail.starttls()
+    gmail.ehlo()
+    gmail.login(
+            config.get("Global", "GmailUser"),
+            config.get("Global", "GmailPass")
+            )
+    gmail.sendmail(
+            config.get("Global", "GmailUser"),
+            config.get("Global", "EmailRecipient"),
+            msg.as_string()
+            )
+    gmail.close()
+
+
+def _log_to_postgres(log_tuple):
+    try:
+        import psycopg2
+    except ImportError:
+        return
+    con = psycopg2.connect(
+            host=config.get("Postgres", "Host"),
+            port=config.getint("Postgres", "Port"),
+            user=config.get("Postgres", "User"),
+            password=config.get("Postgres", "Pass"),
+            )
+    cur = con.cursor()
+    statement = config.get("Postgres", "InsertStatement")
+    cur.execute(statement, log_tuple)
+    con.commit()
+    cur.close()
+    con.close()
 
 
 def communicate_line(line):
@@ -25,7 +78,9 @@ def communicate_line(line):
     if config.getboolean("Global", "Debug"):
         print("Csv line is:", line)
     now = datetime.datetime.now()
-    print("Running timepoint %i at %s" % (timepoint_count, now), end='... ')
+    log_str = "Running timepoint %i at %s" % (timepoint_count, now)
+    print(log_str, end='... ')
+    chamber_num = config.get("Global", "Chamber")
     sys.stdout.flush()  # flush to force buffering, so above is printed
     try:
         if config.getboolean("Conviron", "Use"):
@@ -33,11 +88,15 @@ def communicate_line(line):
         if config.getboolean("Heliospectra", "Use"):
             heliospectra.communicate(line)
         print("Success")
+        log_tuple = (chamber_num, "FALSE", log_str)
     except (OSError, EOFError, socket.error) as e:
         print("FAIL")
         if config.getboolean("Global", "Debug"):
             traceback.print_exception(*sys.exc_info())
-        # TODO: email error
+        traceback_text = traceback.format_exc()
+        _email_traceback(traceback_text)
+        log_tuple = (chamber_num, "TRUE", "%s\n%s" % (log_str, traceback_text))
+    _log_to_postgres(log_tuple)
 
 
 def main():
