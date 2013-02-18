@@ -46,6 +46,24 @@ def _email_traceback(traceback):
     gmail.close()
 
 
+def _log_to_postgres(log_tuple):
+    try:
+        import psycopg2
+    except ImportError:
+        return
+    con = psycopg2.connect(
+            host=config.get("Postgres", "Host"),
+            port=config.getint("Postgres", "Port"),
+            user=config.get("Postgres", "User"),
+            password=config.get("Postgres", "Pass"),
+            )
+    cur = con.cursor()
+    statement = config.get("Postgres", "InsertStatement").format(*log_tuple)
+    cur.execute(statement)
+    cur.close()
+    con.close()
+
+
 def communicate_line(line):
     """This processes each line, and handles any errors which they create
     elegantly.
@@ -55,7 +73,8 @@ def communicate_line(line):
     if config.getboolean("Global", "Debug"):
         print("Csv line is:", line)
     now = datetime.datetime.now()
-    print("Running timepoint %i at %s" % (timepoint_count, now), end='... ')
+    log_str = "Running timepoint %i at %s" % (timepoint_count, now)
+    print(log_str, end='... ')
     sys.stdout.flush()  # flush to force buffering, so above is printed
     try:
         if config.getboolean("Conviron", "Use"):
@@ -63,13 +82,15 @@ def communicate_line(line):
         if config.getboolean("Heliospectra", "Use"):
             heliospectra.communicate(line)
         print("Success")
+        log_tuple = ("FALSE", log_str)
     except (OSError, EOFError, socket.error) as e:
         print("FAIL")
         if config.getboolean("Global", "Debug"):
             traceback.print_exception(*sys.exc_info())
         traceback_text = traceback.format_exc()
         _email_traceback(traceback_text)
-        # TODO: email error
+        log_tuple = ("TRUE", "%s\nERROR!!!\n%s" % (log_str, traceback_text))
+    _log_to_postgres(log_tuple)
 
 
 def main():
