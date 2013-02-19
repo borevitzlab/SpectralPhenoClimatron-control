@@ -1,6 +1,10 @@
 import psycopg2
 import sys
-from conviron import get_config, CONFIG_FILE
+from conviron import (
+        get_config,
+        CONFIG_FILE,
+        email_error,
+        )
 from datetime import datetime
 
 try:
@@ -50,20 +54,22 @@ def main():
                 )
         for chamber, interval in chamber_dict.items():
             result = _poll_database(chamber)
+            error = None
             try:
                 last_good_result = result[0][0]
+                time_diff = local_now - last_good_result
+                sec_since_good_result = time_diff.days * 24 * 60 * 60 + \
+                        time_diff.seconds
+                if sec_since_good_result > interval:
+                    error = "Chamber %s FAIL:\nToo long since good ping: %i > %i" % \
+                            (chamber, sec_since_good_result, interval,)
+                else:
+                    print("Chamber %s OK" % chamber)
             except IndexError:
-                print("No records for chamber %s" % chamber)
-                continue
-            time_diff = local_now - last_good_result
-            sec_since_good_result = time_diff.days * 24 * 60 * 60 + \
-                    time_diff.seconds
-            if sec_since_good_result > interval:
-                print("Chamber %s FAIL:\nToo long since good ping: %i > %i" % \
-                        (chamber, sec_since_good_result, interval,)
-                        )
-            else:
-                print("Chamber %s OK" % chamber)
+                error = "Chamber %s FAIL:\nNo database log records for chamber" % chamber
+            if error is not None:
+                print(error)
+                email_error(error)
 
 
 if __name__ == "__main__":
