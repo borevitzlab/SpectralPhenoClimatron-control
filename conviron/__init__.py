@@ -1,15 +1,20 @@
 from configparser import ConfigParser
 import sys
 import os
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+import smtplib
 
 CONFIG_FILE = "./conviron.ini"  # Default file name
 
 
-def get_config():
+def get_config(filename=None):
     """Returns a ConfigParser which has read the given filename. If filename is
     not given, uses CONFIG_FILE."""
     # If the config file is specified on the command line, use it
-    if len(sys.argv) > 1:
+    if filename is not None:
+        config_file = filename
+    elif len(sys.argv) > 1:
         if os.path.isfile(sys.argv[1]):
             config_file = sys.argv[1]
         else:
@@ -25,3 +30,35 @@ def get_config():
     except AttributeError:
         parser.read_file(open(config_file))
     return parser
+
+config = get_config()
+
+
+def email_error(message):
+    """Borrows heavily from http://kutuma.blogspot.com.au/2007/08/
+    sending-emails-via-gmail-with-python.html
+    """
+    msg = MIMEMultipart()
+    msg["From"] = config.get("Global", "GmailUser")
+    msg["To"] = config.get("Global", "EmailRecipient")
+    msg["Subject"] = "Conviron Error (Chamber %i)" % \
+            config.getint("Global", "Chamber")
+
+    msg.attach(MIMEText(message))
+
+    gmail = smtplib.SMTP("smtp.gmail.com", 587)
+    gmail.ehlo()
+    gmail.starttls()
+    gmail.ehlo()
+    gmail.login(
+            config.get("Global", "GmailUser"),
+            config.get("Global", "GmailPass")
+            )
+    gmail.sendmail(
+            config.get("Global", "GmailUser"),
+            config.get("Global", "EmailRecipient"),
+            msg.as_string()
+            )
+    gmail.close()
+
+
