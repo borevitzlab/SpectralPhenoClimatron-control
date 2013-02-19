@@ -5,11 +5,13 @@ import os
 CONFIG_FILE = "./conviron.ini"  # Default file name
 
 
-def get_config():
+def get_config(filename=None):
     """Returns a ConfigParser which has read the given filename. If filename is
     not given, uses CONFIG_FILE."""
     # If the config file is specified on the command line, use it
-    if len(sys.argv) > 1:
+    if filename is not None:
+        config_file = filename
+    elif len(sys.argv) > 1:
         if os.path.isfile(sys.argv[1]):
             config_file = sys.argv[1]
         else:
