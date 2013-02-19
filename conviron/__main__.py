@@ -5,49 +5,23 @@ import socket
 import sys
 import time
 import traceback
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
-import smtplib
 from conviron import (
         get_config,
         chamber,
         heliospectra,
+        email_error,
         )
 
 timepoint_count = 0
 
 config = get_config()
 
+
 def _email_traceback(traceback):
-    """Borrows heavily from http://kutuma.blogspot.com.au/2007/08/
-    sending-emails-via-gmail-with-python.html
-    """
     message_text = "Error on chamber %i\n" % config.getint(
             "Global", "Chamber")
     message_text += traceback
-
-    msg = MIMEMultipart()
-    msg["From"] = config.get("Global", "GmailUser")
-    msg["To"] = config.get("Global", "EmailRecipient")
-    msg["Subject"] = "Conviron Error (Chamber %i)" % \
-            config.getint("Global", "Chamber")
-
-    msg.attach(MIMEText(message_text))
-
-    gmail = smtplib.SMTP("smtp.gmail.com", 587)
-    gmail.ehlo()
-    gmail.starttls()
-    gmail.ehlo()
-    gmail.login(
-            config.get("Global", "GmailUser"),
-            config.get("Global", "GmailPass")
-            )
-    gmail.sendmail(
-            config.get("Global", "GmailUser"),
-            config.get("Global", "EmailRecipient"),
-            msg.as_string()
-            )
-    gmail.close()
+    email_error(message_text)
 
 
 def _log_to_postgres(log_tuple):
