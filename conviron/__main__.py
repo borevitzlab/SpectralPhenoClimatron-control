@@ -29,18 +29,22 @@ def _log_to_postgres(log_tuple):
         import psycopg2
     except ImportError:
         return
-    con = psycopg2.connect(
-            host=config.get("Postgres", "Host"),
-            port=config.getint("Postgres", "Port"),
-            user=config.get("Postgres", "User"),
-            password=config.get("Postgres", "Pass"),
-            )
-    cur = con.cursor()
-    statement = config.get("Postgres", "InsertStatement")
-    cur.execute(statement, log_tuple)
-    con.commit()
-    cur.close()
-    con.close()
+    try:
+        con = psycopg2.connect(
+                host=config.get("Postgres", "Host"),
+                port=config.getint("Postgres", "Port"),
+                user=config.get("Postgres", "User"),
+                password=config.get("Postgres", "Pass"),
+                )
+        cur = con.cursor()
+        statement = config.get("Postgres", "InsertStatement")
+        cur.execute(statement, log_tuple)
+        con.commit()
+        cur.close()
+        con.close()
+    except Exception as e:
+        print("Could not log to database")
+        print(sys.exc_info())
 
 
 def communicate_line(line):
