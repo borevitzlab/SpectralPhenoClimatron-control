@@ -5,6 +5,7 @@ from conviron import (
         get_config,
         )
 from datetime import datetime
+from time import sleep
 
 try:
     monitor_config_file = sys.argv[2]
@@ -64,6 +65,7 @@ def main():
                 print(error)
                 subject = "Conviron monitoring error in chamber %s" % chamber
                 email_error(subject, error)
+        sleep(60)
 
 
 if __name__ == "__main__":
