@@ -34,31 +34,31 @@ def get_config(filename=None):
 config = get_config()
 
 
-def email_error(message):
+def email_error(subject, message):
     """Borrows heavily from http://kutuma.blogspot.com.au/2007/08/
     sending-emails-via-gmail-with-python.html
     """
-    msg = MIMEMultipart()
-    msg["From"] = config.get("Global", "GmailUser")
-    msg["To"] = config.get("Global", "EmailRecipient")
-    msg["Subject"] = "Conviron Error (Chamber %i)" % \
-            config.getint("Global", "Chamber")
+    try:
+        msg = MIMEMultipart()
+        msg["From"] = config.get("Global", "GmailUser")
+        msg["To"] = config.get("Global", "EmailRecipient")
+        msg["Subject"] = subject
+        msg.attach(MIMEText(message))
 
-    msg.attach(MIMEText(message))
-
-    gmail = smtplib.SMTP("smtp.gmail.com", 587)
-    gmail.ehlo()
-    gmail.starttls()
-    gmail.ehlo()
-    gmail.login(
-            config.get("Global", "GmailUser"),
-            config.get("Global", "GmailPass")
+        gmail = smtplib.SMTP("smtp.gmail.com", 587)
+        gmail.ehlo()
+        gmail.starttls()
+        gmail.ehlo()
+        gmail.login(
+                config.get("Global", "GmailUser"),
+                config.get("Global", "GmailPass")
             )
-    gmail.sendmail(
-            config.get("Global", "GmailUser"),
-            config.get("Global", "EmailRecipient"),
-            msg.as_string()
-            )
-    gmail.close()
-
+        gmail.sendmail(
+                config.get("Global", "GmailUser"),
+                config.get("Global", "EmailRecipient"),
+                msg.as_string()
+                )
+        gmail.close()
+    except:
+        pass
 

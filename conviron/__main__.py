@@ -21,7 +21,9 @@ def _email_traceback(traceback):
     message_text = "Error on chamber %i\n" % config.getint(
             "Global", "Chamber")
     message_text += traceback
-    email_error(message_text)
+    subject = "Conviron Error (Chamber %i)" % config.getint("Global",
+            "Chamber")
+    email_error(subject, message_text)
 
 
 def _log_to_postgres(log_tuple):
@@ -29,18 +31,22 @@ def _log_to_postgres(log_tuple):
         import psycopg2
     except ImportError:
         return
-    con = psycopg2.connect(
-            host=config.get("Postgres", "Host"),
-            port=config.getint("Postgres", "Port"),
-            user=config.get("Postgres", "User"),
-            password=config.get("Postgres", "Pass"),
-            )
-    cur = con.cursor()
-    statement = config.get("Postgres", "InsertStatement")
-    cur.execute(statement, log_tuple)
-    con.commit()
-    cur.close()
-    con.close()
+    try:
+        con = psycopg2.connect(
+                host=config.get("Postgres", "Host"),
+                port=config.getint("Postgres", "Port"),
+                user=config.get("Postgres", "User"),
+                password=config.get("Postgres", "Pass"),
+                )
+        cur = con.cursor()
+        statement = config.get("Postgres", "InsertStatement")
+        cur.execute(statement, log_tuple)
+        con.commit()
+        cur.close()
+        con.close()
+    except Exception as e:
+        print("Could not log to database")
+        print(sys.exc_info())
 
 
 def communicate_line(line):

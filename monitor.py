@@ -1,18 +1,12 @@
 import psycopg2
 import sys
 from conviron import (
-        get_config,
-        CONFIG_FILE,
         email_error,
+        get_config,
         )
 from datetime import datetime
+from time import sleep
 
-try:
-    config_file = sys.argv[1]
-except IndexError:
-    config_file = CONFIG_FILE
-
-config = get_config(config_file)
 try:
     monitor_config_file = sys.argv[2]
 except IndexError:
@@ -23,10 +17,10 @@ monitor_config = get_config(monitor_config_file)
 
 def _poll_database(chamber):
     con = psycopg2.connect(
-            host=config.get("Postgres", "Host"),
-            port=config.getint("Postgres", "Port"),
-            user=config.get("Postgres", "User"),
-            password=config.get("Postgres", "Pass"),
+            host=monitor_config.get("Postgres", "Host"),
+            port=monitor_config.getint("Postgres", "Port"),
+            user=monitor_config.get("Postgres", "User"),
+            password=monitor_config.get("Postgres", "Pass"),
             )
     cur = con.cursor()
     statement = monitor_config.get("Postgres", "SelectLogPassesStatement")
@@ -69,7 +63,9 @@ def main():
                 error = "Chamber %s FAIL:\nNo database log records for chamber" % chamber
             if error is not None:
                 print(error)
-                email_error(error)
+                subject = "Conviron monitoring error in chamber %s" % chamber
+                email_error(subject, error)
+        sleep(60)
 
 
 if __name__ == "__main__":
