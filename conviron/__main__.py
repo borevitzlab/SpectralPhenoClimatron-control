@@ -21,7 +21,9 @@ def _email_traceback(traceback):
     message_text = "Error on chamber %i\n" % config.getint(
             "Global", "Chamber")
     message_text += traceback
-    email_error(message_text)
+    subject = "Conviron Error (Chamber %i)" % config.getint("Global",
+            "Chamber")
+    email_error(subject, message_text)
 
 
 def _log_to_postgres(log_tuple):

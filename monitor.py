@@ -62,7 +62,8 @@ def main():
                 error = "Chamber %s FAIL:\nNo database log records for chamber" % chamber
             if error is not None:
                 print(error)
-                email_error(error)
+                subject = "Conviron monitoring error in chamber %s" % chamber
+                email_error(subject, error)
 
 
 if __name__ == "__main__":
