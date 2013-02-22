@@ -1,6 +1,7 @@
 *.py[cod]
 *.swp
 *.csv
+TODO
 
 # C extensions
 *.so
