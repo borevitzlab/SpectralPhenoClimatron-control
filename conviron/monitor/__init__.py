@@ -69,4 +69,4 @@ def main():
                 print(error)
                 subject = "Conviron monitoring error in chamber %s" % chamber
                 email_error(subject, error)
-        sleep(60)
+        sleep(monitor_config.getint("Monitor", "SleepInterval"))
