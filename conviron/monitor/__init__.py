@@ -70,7 +70,3 @@ def main():
                 subject = "Conviron monitoring error in chamber %s" % chamber
                 email_error(subject, error)
         sleep(60)
-
-
-if __name__ == "__main__":
-    main()
