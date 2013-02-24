@@ -45,8 +45,8 @@ def _log_to_postgres(log_tuple):
         cur.close()
         con.close()
     except Exception as e:
-        print("Could not log to database")
-        print(sys.exc_info())
+        traceback_text = traceback.format_exc()
+        _email_traceback(traceback_text)
 
 
 def communicate_line(line):

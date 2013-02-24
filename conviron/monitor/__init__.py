@@ -16,19 +16,23 @@ monitor_config = get_config(monitor_config_file)
 
 
 def _poll_database(chamber):
-    con = psycopg2.connect(
-            host=monitor_config.get("Postgres", "Host"),
-            port=monitor_config.getint("Postgres", "Port"),
-            user=monitor_config.get("Postgres", "User"),
-            password=monitor_config.get("Postgres", "Pass"),
-            )
-    cur = con.cursor()
-    statement = monitor_config.get("Postgres", "SelectLogPassesStatement")
-    cur.execute(statement, chamber)
-    result = list(cur)
-    cur.close()
-    con.close()
-    return result
+    try:
+        con = psycopg2.connect(
+                host=monitor_config.get("Postgres", "Host"),
+                port=monitor_config.getint("Postgres", "Port"),
+                user=monitor_config.get("Postgres", "User"),
+                password=monitor_config.get("Postgres", "Pass"),
+                )
+        cur = con.cursor()
+        statement = monitor_config.get("Postgres", "SelectLogPassesStatement")
+        cur.execute(statement, chamber)
+        result = list(cur)
+        cur.close()
+        con.close()
+        return result
+    except Exception as e:
+        traceback_text = traceback.format_exc()
+        email_error("Error polling database", traceback_text)
 
 
 def main():
@@ -65,8 +69,4 @@ def main():
                 print(error)
                 subject = "Conviron monitoring error in chamber %s" % chamber
                 email_error(subject, error)
-        sleep(60)
-
-
-if __name__ == "__main__":
-    main()
+        sleep(monitor_config.getint("Monitor", "SleepInterval"))
