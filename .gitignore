@@ -2,6 +2,7 @@
 *.swp
 *.csv
 TODO
+.venv
 
 # C extensions
 *.so
