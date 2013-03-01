@@ -20,7 +20,9 @@ def communicate(line):
     for wl in sorted(wavelengths):
         intensity = float(line[config.getint("HeliospectraCsvFields", wl)])
         # Solarcalc gives percentages, telnet wants value in 0-255
-        intensity = int(round(intensity * 2.55))
+        intensity = int(round(
+            intensity * config.getfloat("Heliospectra", "Multiplier")
+            ))
         intensities.append((wl, intensity))
 
     intensities = sorted(intensities)
