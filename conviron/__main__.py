@@ -14,7 +14,14 @@ from conviron import (
 
 timepoint_count = 0
 
-config = get_config()
+try:
+    config_file = sys.argv[2]
+    with open(config_file) as fh:
+        pass  # can we open it
+except (KeyError, IOError):
+    config_file = "./conviron.ini"  # Default file name
+
+config = get_config(config_file)
 
 
 def _email_traceback(traceback):
