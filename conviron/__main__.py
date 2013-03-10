@@ -92,7 +92,15 @@ def main():
     """
 
     # open the CSV file, and make the csv reader
-    csv_fh = open(config.get("Global", "CsvFilePath"))
+    try:
+        csv_file = sys.argv[1]
+        csv_fh = open(csv_file)
+    except (KeyError, IOError):
+        print("ERROR: csv file must exist\n"
+                "Usage:\n"
+                "\tpython3 -m convrion <csv_file> [<ini.file>]"
+                )
+
     csv_reader = csv.reader(csv_fh, delimiter=',',
             quoting=csv.QUOTE_NONE)
     # Define these for short/easy reference later
