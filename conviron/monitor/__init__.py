@@ -8,7 +8,7 @@ from datetime import datetime
 from time import sleep
 
 try:
-    monitor_config_file = sys.argv[2]
+    monitor_config_file = sys.argv[1]
 except IndexError:
     monitor_config_file = "./monitor.ini"
 
