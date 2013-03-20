@@ -6,6 +6,7 @@ from conviron import (
         )
 from datetime import datetime
 from time import sleep
+import traceback
 
 try:
     monitor_config_file = sys.argv[1]
