@@ -8,7 +8,7 @@ from datetime import datetime
 from time import sleep
 
 try:
-    monitor_config_file = sys.argv[2]
+    monitor_config_file = sys.argv[1]
 except IndexError:
     monitor_config_file = "./monitor.ini"
 
@@ -32,7 +32,7 @@ def _poll_database(chamber):
         return result
     except Exception as e:
         traceback_text = traceback.format_exc()
-        email_error("Error polling database", traceback_text)
+        email_error("Error polling database", traceback_text, monitor_config_file)
 
 
 def main():
@@ -68,5 +68,5 @@ def main():
             if error is not None:
                 print(error)
                 subject = "Conviron monitoring error in chamber %s" % chamber
-                email_error(subject, error)
+                email_error(subject, error, monitor_config_file)
         sleep(monitor_config.getint("Monitor", "SleepInterval"))

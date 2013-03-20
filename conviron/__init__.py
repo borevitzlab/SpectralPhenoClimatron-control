@@ -5,22 +5,14 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 import smtplib
 
-CONFIG_FILE = "./conviron.ini"  # Default file name
 
 
-def get_config(filename=None):
+def get_config(filename):
     """Returns a ConfigParser which has read the given filename. If filename is
     not given, uses CONFIG_FILE."""
     # If the config file is specified on the command line, use it
     if filename is not None:
         config_file = filename
-    elif len(sys.argv) > 1:
-        if os.path.isfile(sys.argv[1]):
-            config_file = sys.argv[1]
-        else:
-            print("Incorrect commandline.\n"
-                "Format is `python -m conviron <ini_file_path>`")
-            sys.exit(1)
     else:
         config_file = CONFIG_FILE
 
@@ -31,13 +23,13 @@ def get_config(filename=None):
         parser.read_file(open(config_file))
     return parser
 
-config = get_config()
 
 
-def email_error(subject, message):
+def email_error(subject, message, config_file="./conviron.ini"):
     """Borrows heavily from http://kutuma.blogspot.com.au/2007/08/
     sending-emails-via-gmail-with-python.html
     """
+    config = get_config(config_file)
     try:
         msg = MIMEMultipart()
         msg["From"] = config.get("Global", "GmailUser")
