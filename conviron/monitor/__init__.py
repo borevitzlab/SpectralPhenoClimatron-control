@@ -53,6 +53,12 @@ def main():
                 )
         for chamber, interval in chamber_dict.items():
             result = _poll_database(chamber)
+            if result is None:
+                # An error occured in _poll_database, wait 5 sec and retry
+                print("%s: SQL error, retrying" %
+                        (datetime.now().isoformat(),))
+                sleep(5)
+                break
             error = None
             try:
                 last_good_result = result[0][0]
@@ -70,4 +76,4 @@ def main():
                 print(error)
                 subject = "Conviron monitoring error in chamber %s" % chamber
                 email_error(subject, error, monitor_config_file)
-        sleep(monitor_config.getint("Monitor", "SleepInterval"))
+                sleep(monitor_config.getint("Monitor", "SleepInterval"))
