@@ -33,6 +33,8 @@ def _poll_database(chamber):
         return result
     except Exception as e:
         traceback_text = traceback.format_exc()
+        if monitor_config.getboolean("Monitor", "Debug"):
+            print(traceback_text)
         email_error("Error polling database", traceback_text, monitor_config_file)
 
 
@@ -69,7 +71,8 @@ def main():
                     error = "Chamber %s FAIL:\nToo long since good ping: %i > %i" % \
                             (chamber, sec_since_good_result, interval,)
                 else:
-                    print("Chamber %s OK" % chamber)
+                    print("%s: Chamber %s OK" %
+                            (datetime.now().isoformat(), chamber))
             except IndexError:
                 error = "Chamber %s FAIL:\nNo database log records for chamber" % chamber
             if error is not None:
