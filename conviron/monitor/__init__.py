@@ -26,7 +26,7 @@ def _poll_database(chamber):
                 )
         cur = con.cursor()
         statement = monitor_config.get("Postgres", "SelectLogPassesStatement")
-        cur.execute(statement, chamber)
+        cur.execute(statement, (chamber,))
         result = list(cur)
         cur.close()
         con.close()
