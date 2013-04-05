@@ -4,7 +4,7 @@ setup(
     name="conviron",
     install_requires=['psycopg2==2.4.6', ],
     packages=['conviron', 'conviron.monitor',],
-    version="0.0b5",
+    version="0.0b6",
     description=("A controller module for Conviron growth cabinets "
         "and Heliospectra mulitspectrat lamps"),
     author="Kevin Murray",
