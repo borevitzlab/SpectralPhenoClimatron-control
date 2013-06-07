@@ -2,6 +2,7 @@ from telnetlib import Telnet
 from conviron import (
         get_config,
         get_config_file
+        CONFIG_FILE
         )
 
 

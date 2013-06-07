@@ -5,6 +5,7 @@ import socket
 import sys
 import time
 import traceback
+import conviron
 from conviron import (
         get_config_file,
         get_config,
@@ -13,17 +14,31 @@ from conviron import (
         email_error,
         )
 
+<<<<<<< Updated upstream
 
 timepoint_count = 0
 config = get_config(get_config_file())
+=======
+timepoint_count = 0
+
+try:
+    config_file = sys.argv[2]
+    with open(config_file) as fh:
+        pass  # we can open it
+except (IndexError, IOError):
+    config_file = "./conviron.ini"  # Default file name
+
+conviron.CONFIG_FILE = config_file
+config = get_config(config_file)
+>>>>>>> Stashed changes
 
 
 def _email_traceback(traceback):
-    message_text = "Error on chamber %i\n" % config.getint(
-            "Global", "Chamber")
+    message_text = "Error on chamber %i\n" % \
+            config.getint("Global", "Chamber")
     message_text += traceback
-    subject = "Conviron Error (Chamber %i)" % config.getint("Global",
-            "Chamber")
+    subject = "Conviron Error (Chamber %i)" % \
+            config.getint("Global", "Chamber")
     email_error(subject, message_text)
 
 
