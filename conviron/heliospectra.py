@@ -1,10 +1,13 @@
 from telnetlib import Telnet
-from conviron import get_config
-
-config = get_config()
+from conviron import (
+        get_config,
+        get_config_file
+        )
 
 
 def communicate(line):
+    config = get_config(get_config_file())
+
     # # We do the login manually # #
     # Establish connection
     telnet = Telnet(config.get("Heliospectra", "MasterHost"),
