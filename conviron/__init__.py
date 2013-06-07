@@ -6,15 +6,20 @@ from email.mime.multipart import MIMEMultipart
 import smtplib
 
 
+def get_config_file():
+    try:
+        config_file = sys.argv[2]
+        with open(config_file) as fh:
+            pass  # we can open it
+    except (IndexError, IOError):
+        config_file = "./conviron.ini"  # Default file name
+    return config_file
 
-def get_config(filename):
+
+def get_config(config_file):
     """Returns a ConfigParser which has read the given filename. If filename is
-    not given, uses CONFIG_FILE."""
+    not given, uses get_config_file()."""
     # If the config file is specified on the command line, use it
-    if filename is not None:
-        config_file = filename
-    else:
-        config_file = CONFIG_FILE
 
     parser = ConfigParser()
     try:

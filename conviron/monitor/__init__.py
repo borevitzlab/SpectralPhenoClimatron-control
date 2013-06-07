@@ -26,13 +26,15 @@ def _poll_database(chamber):
                 )
         cur = con.cursor()
         statement = monitor_config.get("Postgres", "SelectLogPassesStatement")
-        cur.execute(statement, chamber)
+        cur.execute(statement, (chamber,))
         result = list(cur)
         cur.close()
         con.close()
         return result
     except Exception as e:
         traceback_text = traceback.format_exc()
+        if monitor_config.getboolean("Monitor", "Debug"):
+            print(traceback_text)
         email_error("Error polling database", traceback_text, monitor_config_file)
 
 
@@ -53,6 +55,12 @@ def main():
                 )
         for chamber, interval in chamber_dict.items():
             result = _poll_database(chamber)
+            if result is None:
+                # An error occured in _poll_database, wait 5 sec and retry
+                print("%s: SQL error, retrying" %
+                        (datetime.now().isoformat(),))
+                sleep(5)
+                break
             error = None
             try:
                 last_good_result = result[0][0]
@@ -63,11 +71,12 @@ def main():
                     error = "Chamber %s FAIL:\nToo long since good ping: %i > %i" % \
                             (chamber, sec_since_good_result, interval,)
                 else:
-                    print("Chamber %s OK" % chamber)
+                    print("%s: Chamber %s OK" %
+                            (datetime.now().isoformat(), chamber))
             except IndexError:
                 error = "Chamber %s FAIL:\nNo database log records for chamber" % chamber
             if error is not None:
                 print(error)
                 subject = "Conviron monitoring error in chamber %s" % chamber
                 email_error(subject, error, monitor_config_file)
-        sleep(monitor_config.getint("Monitor", "SleepInterval"))
+                sleep(monitor_config.getint("Monitor", "SleepInterval"))
