@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name="conviron",
-    install_requires=['psycopg2==2.4.6', ],
+    install_requires=['psycopg2>=2.4.6', ],
     packages=['conviron', 'conviron.monitor',],
     version="0.0b6",
     description=("A controller module for Conviron growth cabinets "
