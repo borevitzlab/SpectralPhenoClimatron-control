@@ -5,8 +5,6 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 import smtplib
 
-CONFIG_FILE = None
-
 
 def get_config_file():
     try:
