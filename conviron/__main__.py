@@ -6,22 +6,16 @@ import sys
 import time
 import traceback
 from conviron import (
+        get_config_file,
         get_config,
         chamber,
         heliospectra,
         email_error,
         )
 
+
 timepoint_count = 0
-
-try:
-    config_file = sys.argv[2]
-    with open(config_file) as fh:
-        pass  # can we open it
-except (KeyError, IOError):
-    config_file = "./conviron.ini"  # Default file name
-
-config = get_config(config_file)
+config = get_config(get_config_file())
 
 
 def _email_traceback(traceback):

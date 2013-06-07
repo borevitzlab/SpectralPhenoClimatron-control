@@ -1,11 +1,10 @@
 from telnetlib import Telnet
-from conviron import get_config
+from conviron import (get_config, get_config_file)
 from time import sleep
-
-config = get_config()
 
 
 def _run(telnet, commands):
+    config = get_config(get_config_file())
     response = b''
     for command in commands:
         if config.getboolean("Global", "Debug"):
@@ -18,6 +17,7 @@ def _run(telnet, commands):
 
 
 def communicate(line):
+    config = get_config(get_config_file())
     cmd_str = "%s %s " % (
             config.get("Conviron", "SetCommand"),
             config.get("Conviron", "DeviceID")
