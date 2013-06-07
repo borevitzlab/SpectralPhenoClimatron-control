@@ -100,6 +100,7 @@ def main():
                 "Usage:\n"
                 "\tpython3 -m convrion <csv_file> [<ini.file>]"
                 )
+        exit(-1)
 
     csv_reader = csv.reader(csv_fh, delimiter=',',
             quoting=csv.QUOTE_NONE)
