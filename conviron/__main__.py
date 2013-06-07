@@ -19,11 +19,11 @@ config = get_config(get_config_file())
 
 
 def _email_traceback(traceback):
-    message_text = "Error on chamber %i\n" % config.getint(
-            "Global", "Chamber")
+    message_text = "Error on chamber %i\n" % \
+            config.getint("Global", "Chamber")
     message_text += traceback
-    subject = "Conviron Error (Chamber %i)" % config.getint("Global",
-            "Chamber")
+    subject = "Conviron Error (Chamber %i)" % \
+            config.getint("Global", "Chamber")
     email_error(subject, message_text)
 
 
