@@ -3,16 +3,19 @@ from conviron import (get_config, get_config_file)
 from time import sleep
 import re
 
+TIMEOUT = 10
+
+
 def _run(telnet, command, expected):
     config = get_config(get_config_file())
     if config.getboolean("Global", "Debug"):
         print("Sending command: ", command.decode())
     telnet.write(command)
-    response = telnet.expect(expected, timeout=5)
+    response = telnet.expect([expected,], timeout=TIMEOUT)
     if config.getboolean("Global", "Debug"):
         print("Received: ", response[2].decode())
     if response[0] < 0:  # No match found
-        raise Error("Expected response was not received")
+        raise RuntimeError("Expected response was not received")
     return response
 
 
@@ -26,31 +29,31 @@ def communicate(line):
     # # We do the login manually # #
     # Establish connection
     telnet = Telnet(config.get("Conviron", "Host"))
-    response = telnet.expect(re.compile(b"login: $"), 5)
+    response = telnet.expect([re.compile(b"login:")),], timeout=TIMEOUT)
     if config.getboolean("Global", "Debug") > 0:
         print("Initial response is:", response[2].decode())
     if response[0] < 0:  # No match found
-        raise Error("Login prompt was not received")
+        raise RuntimeError("Login prompt was not received")
 
     # Username
     payload = bytes(config.get("Conviron", "User") + "\n", encoding="UTF8")
     telnet.write(payload)
-    response = telnet.expect(re.compile(b"Password: $"), timeout=5)
+    response = telnet.expect([re.compile(b"Password:")),], timeout=TIMEOUT)
     if config.getboolean("Global", "Debug") > 0:
         print("Sent username:", payload.decode())
         print("Received:", response[2].decode())
     if response[0] < 0:  # No match found
-        raise Error("Password prompt was not received")
+        raise RuntimeError("Password prompt was not received")
 
     # Password
     payload = bytes(config.get("Conviron", "Password") + "\n", encoding="UTF8")
     telnet.write(payload)
-    response = telnet.expect(re.compile(b"#$"), timeout=5)
+    response = telnet.expect([re.compile(b"#")),], timeout=TIMEOUT)
     if config.getboolean("Global", "Debug") > 0:
         print("Send password:", payload.decode())
         print("Received:", response[2].decode())
     if response[0] < 0:  # No match found
-        raise Error("Password prompt was not received")
+        raise RuntimeError("Shell prompt was not received")
 
     # Make list for the "Set" part of the communication
     # Append init commands to command list
@@ -88,7 +91,7 @@ def communicate(line):
         command_list.append(bytes(cmd_str + params + "\n", encoding="UTF8"))
     # Run set commands sequence
     for command in command_list:
-        _run(telnet, command, re.compile(b"# $"))
+        _run(telnet, command, re.compile(b"#"))
     sleep(2)
 
     # Clear write flag
@@ -96,7 +99,7 @@ def communicate(line):
             cmd_str + config.get("Conviron", "ClearWriteFlagCommand") + "\n",
             encoding="UTF8"
             )
-    _run(telnet, write_flag_command, re.compile(b"# $"))
+    _run(telnet, write_flag_command, re.compile(b"#"))
     sleep(2)
 
     # Make list of Reload command sequences
@@ -110,7 +113,7 @@ def communicate(line):
     # Run Reload command sequence
 
     for command in command_list:
-        _run(telnet, command, re.compile(b"# $"))
+        _run(telnet, command, re.compile(b"#"))
     sleep(2)
 
     # Clear write flag
@@ -118,7 +121,7 @@ def communicate(line):
             cmd_str + config.get("Conviron", "ClearWriteFlagCommand") + "\n",
             encoding="UTF8"
             )
-    _run(telnet,clear_write_flag_cmd, re.compile(b"# $"))
+    _run(telnet,clear_write_flag_cmd, re.compile(b"#"))
     sleep(2)
 
     # Clear Busy flag
@@ -127,7 +130,7 @@ def communicate(line):
             encoding="UTF8"
             )
 
-    _run(telnet, clear_busy_flag_cmd, re.compile(b"# $"))
+    _run(telnet, clear_busy_flag_cmd, re.compile(b"#"))
     sleep(2)
 
     # Close telnet session
