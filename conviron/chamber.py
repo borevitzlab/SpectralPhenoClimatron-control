@@ -29,7 +29,7 @@ def communicate(line):
     # # We do the login manually # #
     # Establish connection
     telnet = Telnet(config.get("Conviron", "Host"))
-    response = telnet.expect([re.compile(b"login:")),], timeout=TIMEOUT)
+    response = telnet.expect([re.compile(b"login:"),], timeout=TIMEOUT)
     if config.getboolean("Global", "Debug") > 0:
         print("Initial response is:", response[2].decode())
     if response[0] < 0:  # No match found
@@ -38,7 +38,7 @@ def communicate(line):
     # Username
     payload = bytes(config.get("Conviron", "User") + "\n", encoding="UTF8")
     telnet.write(payload)
-    response = telnet.expect([re.compile(b"Password:")),], timeout=TIMEOUT)
+    response = telnet.expect([re.compile(b"Password:"),], timeout=TIMEOUT)
     if config.getboolean("Global", "Debug") > 0:
         print("Sent username:", payload.decode())
         print("Received:", response[2].decode())
@@ -48,7 +48,7 @@ def communicate(line):
     # Password
     payload = bytes(config.get("Conviron", "Password") + "\n", encoding="UTF8")
     telnet.write(payload)
-    response = telnet.expect([re.compile(b"#")),], timeout=TIMEOUT)
+    response = telnet.expect([re.compile(b"#"),], timeout=TIMEOUT)
     if config.getboolean("Global", "Debug") > 0:
         print("Send password:", payload.decode())
         print("Received:", response[2].decode())
