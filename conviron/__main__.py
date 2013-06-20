@@ -70,7 +70,7 @@ def communicate_line(line):
             heliospectra.communicate(line)
         print("Success")
         log_tuple = (chamber_num, "FALSE", log_str)
-    except (OSError, EOFError, socket.error) as e:
+    except Exception as e:
         print("FAIL")
         if config.getboolean("Global", "Debug"):
             traceback.print_exception(*sys.exc_info())
