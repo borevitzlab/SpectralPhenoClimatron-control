@@ -30,7 +30,7 @@ def get_config(config_file):
 
 
 
-def email_error(subject, message, config_file=None):
+def email_error(subject, message, config_file=""):
     """Borrows heavily from http://kutuma.blogspot.com.au/2007/08/
     sending-emails-via-gmail-with-python.html
     """
