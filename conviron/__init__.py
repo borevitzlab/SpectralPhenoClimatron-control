@@ -30,10 +30,14 @@ def get_config(config_file):
 
 
 
-def email_error(subject, message, config_file="./conviron.ini"):
+def email_error(subject, message, config_file=None):
     """Borrows heavily from http://kutuma.blogspot.com.au/2007/08/
     sending-emails-via-gmail-with-python.html
     """
+
+    if not os.path.exists(config_file):
+        config_file = get_config_file()
+
     config = get_config(config_file)
     try:
         msg = MIMEMultipart()
