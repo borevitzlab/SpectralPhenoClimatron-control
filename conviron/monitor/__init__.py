@@ -5,9 +5,9 @@ from conviron import (
         get_config,
         )
 from datetime import datetime
-from time import sleep
+from time import sleep, timezone
 import traceback
-
+from psycopg2.tz import FixedOffsetTimezone
 try:
     monitor_config_file = sys.argv[1]
 except IndexError:
@@ -50,8 +50,9 @@ def main():
         chamber_dict[chamber] = int(interval)
 
     while True:
+        offset_sec = int(-timezone/60)  # from time import timezone
         local_now = datetime.now().replace(
-                tzinfo=psycopg2.tz.FixedOffsetTimezone(offset=660, name=None),
+                tzinfo=FixedOffsetTimezone(offset=offset_min, name="conviron"),
                 )
         for chamber, interval in chamber_dict.items():
             result = _poll_database(chamber)
