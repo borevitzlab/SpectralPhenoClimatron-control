@@ -1,4 +1,4 @@
-spcControl
+SpectralPhenoClimatron Control
 ========
 
 Control software for the SpectralPhenoClimatron growth chambers and heliospecta LED arrays
