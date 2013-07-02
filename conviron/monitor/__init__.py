@@ -50,7 +50,7 @@ def main():
         chamber_dict[chamber] = int(interval)
 
     while True:
-        offset_sec = int(-timezone/60)  # from time import timezone
+        offset_min = int(-timezone/60)  # from time import timezone
         local_now = datetime.now().replace(
                 tzinfo=FixedOffsetTimezone(offset=offset_min, name="conviron"),
                 )
