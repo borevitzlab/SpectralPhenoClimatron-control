@@ -1,5 +1,5 @@
 from telnetlib import Telnet
-from conviron import (
+from spcChamber import (
         get_config,
         get_config_file
         )

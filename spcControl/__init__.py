@@ -12,7 +12,7 @@ def get_config_file():
         with open(config_file) as fh:
             pass  # we can open it
     except (IndexError, IOError):
-        config_file = "./conviron.ini"  # Default file name
+        config_file = "./chamber.ini"  # Default file name
     return config_file
 
 
