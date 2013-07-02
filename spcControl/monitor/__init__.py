@@ -1,6 +1,6 @@
 import psycopg2
 import sys
-from spcChamber import (
+from spcControl import (
         email_error,
         get_config,
         )

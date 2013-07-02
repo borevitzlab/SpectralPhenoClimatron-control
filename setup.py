@@ -10,7 +10,7 @@ setup(
     author="Kevin Murray",
     author_email="k.d.murray.91@gmail.com",
     url="https://github.com/borevitzlab/SpectralPhenoClimatron-control",
-    keywords=["hvac", "telnet", "heliospectra", "spcChamber"],
+    keywords=["hvac", "telnet", "heliospectra", "spcControl"],
     classifiers=[
         "Programming Language :: Python",
         "Programming Language :: Python :: 3",

@@ -1,3 +1,3 @@
-from spcChamber.monitor import main
+from spcControl.monitor import main
 
 main()
