@@ -1,12 +1,17 @@
 from setuptools import setup
 
+describe = """
+A controller module for the SpecralPhenoClimatron smart growth chambers
+developed in the Borevitz lab. These consist of Conviron growth cabinets
+and Heliospectra mulitspectral lamps
+"""
+
 setup(
     name="spcControl",
     install_requires=['psycopg2>=2.4.6', ],
     packages=['spcControl', 'spcControl.monitor',],
     version="0.1rc4",
-    description=("A controller module for Conviron growth cabinets "
-        "and Heliospectra mulitspectrat lamps"),
+    description=describe,
     author="Kevin Murray",
     author_email="k.d.murray.91@gmail.com",
     url="https://github.com/borevitzlab/SpectralPhenoClimatron-control",
