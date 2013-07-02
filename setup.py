@@ -1,16 +1,16 @@
 from setuptools import setup
 
 setup(
-    name="conviron",
+    name="spcControl",
     install_requires=['psycopg2>=2.4.6', ],
-    packages=['conviron', 'conviron.monitor',],
+    packages=['spcControl', 'spcControl.monitor',],
     version="0.1rc4",
     description=("A controller module for Conviron growth cabinets "
         "and Heliospectra mulitspectrat lamps"),
     author="Kevin Murray",
     author_email="k.d.murray.91@gmail.com",
-    url="https://github.com/borevitzlab/conviron",
-    keywords=["hvac", "telnet", "heliospectra", "conviron"],
+    url="https://github.com/borevitzlab/SpectralPhenoClimatron-control",
+    keywords=["hvac", "telnet", "heliospectra", "spcControl"],
     classifiers=[
         "Programming Language :: Python",
         "Programming Language :: Python :: 3",

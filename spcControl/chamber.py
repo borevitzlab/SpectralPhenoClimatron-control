@@ -1,5 +1,5 @@
 from telnetlib import Telnet
-from conviron import (get_config, get_config_file)
+from spcControl import (get_config, get_config_file)
 from time import sleep
 import re
 

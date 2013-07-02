@@ -1,6 +1,6 @@
 import psycopg2
 import sys
-from conviron import (
+from spcControl import (
         email_error,
         get_config,
         )
@@ -52,7 +52,7 @@ def main():
     while True:
         offset_min = int(-timezone/60)  # from time import timezone
         local_now = datetime.now().replace(
-                tzinfo=FixedOffsetTimezone(offset=offset_min, name="conviron"),
+                tzinfo=FixedOffsetTimezone(offset=offset_min, name="chamber"),
                 )
         for chamber, interval in chamber_dict.items():
             result = _poll_database(chamber)

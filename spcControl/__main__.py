@@ -5,7 +5,7 @@ import socket
 import sys
 import time
 import traceback
-from conviron import (
+from spcControl import (
         get_config_file,
         get_config,
         chamber,
@@ -92,7 +92,7 @@ def main():
     except (KeyError, IOError):
         print("ERROR: csv file must exist\n"
                 "Usage:\n"
-                "\tpython3 -m convrion <csv_file> [<ini.file>]"
+                "\tpython3 -m spcControl <csv_file> [<ini.file>]"
                 )
         exit(-1)
 
