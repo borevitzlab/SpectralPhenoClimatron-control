@@ -10,7 +10,7 @@ setup(
     name="spcControl",
     install_requires=['psycopg2>=2.4.6', ],
     packages=['spcControl', 'spcControl.monitor',],
-    version="0.1rc5",
+    version="0.1",
     description=describe,
     author="Kevin Murray",
     author_email="k.d.murray.91@gmail.com",
