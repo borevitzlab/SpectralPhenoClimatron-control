@@ -8,6 +8,7 @@ from spcControl import (
 def communicate(line):
     config = get_config(get_config_file())
     helio_mode = config.get("Heliospectra", "Mode")
+    helio_csv = helio_mode + "CsvFields"
 
     # # We do the login manually # #
     # Establish connection
@@ -22,7 +23,7 @@ def communicate(line):
 
     intensities = []
     for wl in wavelengths:
-        intensity = float(line[config.getint("HeliospectraCsvFields", wl)])
+        intensity = float(line[config.getint(helio_csv, wl)])
         # Solarcalc gives percentages, telnet wants value in 0-255
         intensity = int(round(
             intensity * config.getfloat(helio_mode, "Multiplier")
