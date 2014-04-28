@@ -77,7 +77,8 @@ def communicate_line(line):
         traceback_text = traceback.format_exc()
         _email_traceback(traceback_text)
         log_tuple = (chamber_num, "TRUE", "%s\n%s" % (log_str, traceback_text))
-    _log_to_postgres(log_tuple)
+    if config.getboolean("Postgres", "Use"):
+        _log_to_postgres(log_tuple)
 
 
 def main():
