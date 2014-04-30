@@ -156,31 +156,24 @@ def log():
     print (temp_resp)
     # str should be:
     # '123 134 \r\n[PS1] # \r\n'
-    # acutal set
+    # "<actual>SPACE<set>SPACE\r\n..."
     temp_str = temp_resp[2]
     temp, temp_set = temp_str.splitlines()[0].strip().split()
-    print (temp, temp_set)
     temp = "{:0.1f}".format(float(temp)/10.0)
     temp_set = "{:0.1f}".format(float(temp_set)/10.0)
-    print (temp, temp_set)
-    sleep(1)
     # Get Rel Humidity
     rh_cmd = bytes("%s %s\n" % (
         cmd_str,
         config.get("Logging", "RHSequence")),
         encoding="UTF8")
     rh_resp = _run(telnet, rh_cmd, re.compile(b"# $"))
-    print (rh_resp)
     # str should be:
     # '52 73 \r\n[PS1] # \r\n'
-    # acutal set
+    # "<actual>SPACE<set>SPACE\r\n..."
     rh_str = rh_resp[2]
     rh, rh_set = rh_str.splitlines()[0].strip().split()
-    print (rh, rh_set)
     rh = rh.decode()
     rh_set = rh_set.decode()
-    print (rh, rh_set)
-    sleep(1)
     # Get PAR
     par_cmd = bytes("%s %s\n" % (
         cmd_str,
@@ -189,11 +182,11 @@ def log():
     par_resp = _run(telnet, par_cmd, re.compile(b"# $"))
     # str should be:
     # '123 \r\n[PS1] # \r\n'
-    # acutal value only (set is always 0)
+    # actual value only (set is always 0)
     par_str = par_resp[2]
     par = par_str.splitlines()[0].strip().decode()
-    print (par)
-    sleep(1)
+    # We're done w/ the telnet handle, close it here to avoid timeout issues
+    telnet.close()
     # Do the logging to a csv file
     now = datetime.datetime.now()
     date = now.strftime(config.get("Logging", "DateFmt"))
@@ -220,4 +213,3 @@ def log():
         })
     # close things that need closing
     lfh.close()
-    telnet.close()
