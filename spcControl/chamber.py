@@ -152,29 +152,45 @@ def log():
         cmd_str,
         config.get("Logging", "TempSequence")),
         encoding="UTF8")
-    temp_resp = _run(telnet, temp_cmd, re.compile(b"# (.+)$"))
+    temp_resp = _run(telnet, temp_cmd, re.compile(b"# $"))
     print (temp_resp)
-    temp = temp_resp.groups()[1]
-    print (temp)
+    # str should be:
+    # '123 134 \r\n[PS1] # \r\n'
+    temp_str = temp_resp[2]
+    temp, temp_set = temp_str.splitlines()[0].strip().split()
+    print (temp, temp_set)
+    temp = "{:02f}".format(float(temp)/10.0)
+    temp_set = "{:02f}".format(float(temp_set)/10.0)
+    print (temp, temp_set)
     sleep(1)
     # Get Rel Humidity
     rh_cmd = bytes("%s %s\n" % (
         cmd_str,
         config.get("Logging", "RHSequence")),
         encoding="UTF8")
-    rh_resp = _run(telnet, rh_cmd, re.compile(b"# (.+)$"))
+    rh_resp = _run(telnet, rh_cmd, re.compile(b"# $"))
     print (rh_resp)
-    rh = rh_resp.groups()[1]
-    print (rh)
+    # str should be:
+    # '123 134 \r\n[PS1] # \r\n'
+    rh_str = rh_resp[2]
+    rh, rh_set = rh_str.splitlines()[0].strip().split()
+    print (rh, rh_set)
+    rh = "{:02f}".format(float(rh)/10.0)
+    rh_set = "{:02f}".format(float(rh_set)/10.0)
+    print (rh, rh_set)
     sleep(1)
     # Get PAR
     par_cmd = bytes("%s %s\n" % (
         cmd_str,
         config.get("Logging", "PARSequence")),
         encoding="UTF8")
-    par_resp = _run(telnet, par_cmd, re.compile(b"# (.+)$"))
-    print (par_resp)
-    par = par_resp.groups()[1]
+    par_resp = _run(telnet, par_cmd, re.compile(b"# $"))
+    # str should be:
+    # '123 \r\n[PS1] # \r\n'
+    par_str = par_resp[2]
+    par = par_str.splitlines()[0].strip()
+    print (par)
+    par = "{:02f}".format(float(par)/10.0)
     print (par)
     sleep(1)
     # Do the logging to a csv file
