@@ -2,6 +2,7 @@ from telnetlib import Telnet
 from spcControl import (get_config, get_config_file)
 from time import sleep
 import re
+from csv import DictWriter
 
 
 TIMEOUT = 10
@@ -144,5 +145,45 @@ def log():
             )
     # Establish connection
     telnet = _connect(config)
-    # close session
+    # get temp
+    # Append temp command to list
+    temp_cmd = bytes("%s %s\n" % (
+        cmd_str,
+        config.get("Logging", "TempSequence")),
+        encoding="UTF8")
+    temp_resp = _run(telnet, temp_cmd, re.compile(b"# (.+)$"))
+    print (temp_resp)
+    temp = temp_resp.groups()[1]
+    print (temp)
+    sleep(1)
+#    # Append humidity command to list
+#    temp_cmd = bytes("%s %s\n" % (
+#        cmd_str,
+#        config.get("Logging", "TempSequence")),
+#        encoding="UTF8")
+#    temp_resp = _run(telnet, temp_cmd, re.compile(b"#"))
+    # Do the logging to a csv file
+    now = datetime.datetime.now()
+    date = now.strftime(config.get("Logging", "DateFmt"))
+    time = now.strftime(config.get("Logging", "TimeFmt"))
+    logfile = config.get("Logging", "LogFile")
+    loghdr = config.get("Logging", "CSVLogHeader").strip().split(',')
+    if path.exists(logfile):
+        # don't clobber file, use append mode & don't write header
+        lfh = open(logfile, "a")
+        lcsv = DictWriter(lfh, loghdr)
+    else:
+        # new file, so create and write a header
+        lfh = open(logfile, "w")
+        lcsv = DictWriter(lfh, loghdr)
+        lcsv.writeheader()
+    lcsv.writerow({
+        "Date": date,
+        "Time": time,
+        "Temp": temp,
+        "RH": rh,
+        "PAR": par
+        })
+    # close things that need closing
+    lfh.close()
     telnet.close()
