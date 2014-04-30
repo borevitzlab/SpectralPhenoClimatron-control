@@ -66,6 +66,7 @@ def communicate_line(line):
     try:
         if config.getboolean("Conviron", "Use"):
             chamber.communicate(line)
+            chamber.log()
         if config.getboolean("Heliospectra", "Use"):
             heliospectra.communicate(line)
         print("Success")
