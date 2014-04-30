@@ -156,11 +156,12 @@ def log():
     print (temp_resp)
     # str should be:
     # '123 134 \r\n[PS1] # \r\n'
+    # acutal set
     temp_str = temp_resp[2]
     temp, temp_set = temp_str.splitlines()[0].strip().split()
     print (temp, temp_set)
-    temp = "{:02f}".format(float(temp)/10.0)
-    temp_set = "{:02f}".format(float(temp_set)/10.0)
+    temp = "{:0.1f}".format(float(temp)/10.0)
+    temp_set = "{:0.1f}".format(float(temp_set)/10.0)
     print (temp, temp_set)
     sleep(1)
     # Get Rel Humidity
@@ -171,12 +172,13 @@ def log():
     rh_resp = _run(telnet, rh_cmd, re.compile(b"# $"))
     print (rh_resp)
     # str should be:
-    # '123 134 \r\n[PS1] # \r\n'
+    # '52 73 \r\n[PS1] # \r\n'
+    # acutal set
     rh_str = rh_resp[2]
     rh, rh_set = rh_str.splitlines()[0].strip().split()
     print (rh, rh_set)
-    rh = "{:02f}".format(float(rh)/10.0)
-    rh_set = "{:02f}".format(float(rh_set)/10.0)
+    rh = rh.decode()
+    rh_set = rh_set.decode()
     print (rh, rh_set)
     sleep(1)
     # Get PAR
@@ -187,10 +189,9 @@ def log():
     par_resp = _run(telnet, par_cmd, re.compile(b"# $"))
     # str should be:
     # '123 \r\n[PS1] # \r\n'
+    # acutal value only (set is always 0)
     par_str = par_resp[2]
-    par = par_str.splitlines()[0].strip()
-    print (par)
-    par = "{:02f}".format(float(par)/10.0)
+    par = par_str.splitlines()[0].strip().decode()
     print (par)
     sleep(1)
     # Do the logging to a csv file
@@ -201,18 +202,20 @@ def log():
     loghdr = config.get("Logging", "CSVLogHeader").strip().split(',')
     if path.exists(logfile):
         # don't clobber file, use append mode & don't write header
-        lfh = open(logfile, "a")
+        lfh = open(logfile, "a", newline='')
         lcsv = DictWriter(lfh, loghdr)
     else:
         # new file, so create and write a header
-        lfh = open(logfile, "w")
+        lfh = open(logfile, "w", newline='')
         lcsv = DictWriter(lfh, loghdr)
         lcsv.writeheader()
     lcsv.writerow({
         "Date": date,
         "Time": time,
         "Temp": temp,
+        "SetTemp": temp_set,
         "RH": rh,
+        "SetRH": rh_set,
         "PAR": par
         })
     # close things that need closing
