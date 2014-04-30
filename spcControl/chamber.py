@@ -153,7 +153,6 @@ def log():
         config.get("Logging", "TempSequence")),
         encoding="UTF8")
     temp_resp = _run(telnet, temp_cmd, re.compile(b"# $"))
-    print (temp_resp)
     # str should be:
     # '123 134 \r\n[PS1] # \r\n'
     # "<actual>SPACE<set>SPACE\r\n..."
