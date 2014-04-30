@@ -3,6 +3,8 @@ from spcControl import (get_config, get_config_file)
 from time import sleep
 import re
 from csv import DictWriter
+import datetime
+from os import path
 
 
 TIMEOUT = 10
@@ -123,7 +125,7 @@ def communicate(line):
             cmd_str + config.get("Conviron", "ClearWriteFlagCommand") + "\n",
             encoding="UTF8"
             )
-    _run(telnet,clear_write_flag_cmd, re.compile(b"#"))
+    _run(telnet, clear_write_flag_cmd, re.compile(b"#"))
     sleep(2)
     # Clear Busy flag
     clear_busy_flag_cmd = bytes(
@@ -145,8 +147,7 @@ def log():
             )
     # Establish connection
     telnet = _connect(config)
-    # get temp
-    # Append temp command to list
+    # Get temp
     temp_cmd = bytes("%s %s\n" % (
         cmd_str,
         config.get("Logging", "TempSequence")),
@@ -156,12 +157,26 @@ def log():
     temp = temp_resp.groups()[1]
     print (temp)
     sleep(1)
-#    # Append humidity command to list
-#    temp_cmd = bytes("%s %s\n" % (
-#        cmd_str,
-#        config.get("Logging", "TempSequence")),
-#        encoding="UTF8")
-#    temp_resp = _run(telnet, temp_cmd, re.compile(b"#"))
+    # Get Rel Humidity
+    rh_cmd = bytes("%s %s\n" % (
+        cmd_str,
+        config.get("Logging", "RHSequence")),
+        encoding="UTF8")
+    rh_resp = _run(telnet, rh_cmd, re.compile(b"# (.+)$"))
+    print (rh_resp)
+    rh = rh_resp.groups()[1]
+    print (rh)
+    sleep(1)
+    # Get PAR
+    par_cmd = bytes("%s %s\n" % (
+        cmd_str,
+        config.get("Logging", "PARSequence")),
+        encoding="UTF8")
+    par_resp = _run(telnet, par_cmd, re.compile(b"# (.+)$"))
+    print (par_resp)
+    par = par_resp.groups()[1]
+    print (par)
+    sleep(1)
     # Do the logging to a csv file
     now = datetime.datetime.now()
     date = now.strftime(config.get("Logging", "DateFmt"))
