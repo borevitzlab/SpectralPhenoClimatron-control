@@ -1,9 +1,47 @@
 from configparser import ConfigParser
+import logging
 import sys
 import os
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 import smtplib
+
+
+def get_logger(name="spcControl"):
+    config = get_config(get_config_file())
+    # Formattter for both file & stream handlers
+    fmt = logging.Formatter(config.get("Global", "LogFormat"))
+    # Set up a file logger
+    fhand = logging.FileHandler(config.get("Global", "Logfile"))
+    fhand.setFormatter(fmt)
+    if config.getboolean("Global", "Debug"):
+        fhand.setLevel(logging.DEBUG)
+    else:
+        fhand.setLevel(logging.INFO)
+    # Set up stream handler for errors
+    shand = logging.StreamHandler()
+    shand.setFormatter(fmt)
+    shand.setLevel(logging.ERROR)
+    # Email handler for errors
+    email_fmt = logging.Formatter("%(asctime)s %(levelname)s %(message)s")
+    ehand = logging.handlers.SMTPHandler(
+            ("smtp.gmail.com", 587),
+            config.get("Global", "GmailUser"),
+            config.get("Global", "EmailRecipient").strip().split(","),
+            "spcControl Logging Message",
+            credentials = (
+                config.get("Global", "GmailUser"),
+                config.get("Global", "GmailPass")
+            ))
+    ehand.setFormatter(email_fmt)
+    ehand.setLevel(logging.ERROR)
+    # Set up logger
+    log = logging.getLogger("spcControl")
+    log.addHandler(fhand)
+    log.addHandler(shand)
+    log.addHandler(ehand)
+    log.setLevel(logging.DEBUG)
+    return log
 
 
 def get_config_file():
@@ -34,7 +72,6 @@ def email_error(subject, message, config_file=""):
     """Borrows heavily from http://kutuma.blogspot.com.au/2007/08/
     sending-emails-via-gmail-with-python.html
     """
-
     if not os.path.exists(config_file):
         config_file = get_config_file()
 
