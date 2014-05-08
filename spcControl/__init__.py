@@ -24,7 +24,7 @@ def get_logger(name="spcControl"):
     shand.setLevel(logging.ERROR)
     # Email handler for errors
     email_fmt = logging.Formatter("%(asctime)s %(levelname)s %(message)s")
-    ehand = logging.handlers.SMTPHandler(
+    ehand = TlsSMTPHandler(
             ("smtp.gmail.com", 587),
             config.get("Global", "GmailUser"),
             config.get("Global", "EmailRecipient").strip().split(","),
@@ -100,3 +100,41 @@ def email_error(subject, message, config_file=""):
     except:
         pass
 
+class TlsSMTPHandler(logging.handlers.SMTPHandler):
+    """Shamelessly looted from:
+    http://mynthon.net/howto/-/python/python%20-%20logging.SMTPHandler-how-to\
+            -use-gmail-smtp-server.txt"
+    """
+    def emit(self, record):
+        """
+        Emit a record.
+
+        Format the record and send it to the specified addressees.
+        """
+        try:
+            import smtplib
+            import string
+            try:
+                from email.utils import formatdate
+            except ImportError:
+                formatdate = self.date_time
+            port = self.mailport
+            if not port:
+                port = smtplib.SMTP_PORT
+            smtp = smtplib.SMTP(self.mailhost, port)
+            msg = self.format(record)
+            msg = "From: {}\r\n".format(self.fromaddr)
+            msg += "To: {}\r\n".format(",".join(self.toaddrs))
+            msg += "Subject: {}\r\n".format(self.getSubject(record)
+            msg += "Date: {}\r\n\r\n{}".format(formatdate(), msg)
+            if self.username:
+                smtp.ehlo()
+                smtp.starttls()
+                smtp.ehlo()
+                smtp.login(self.username, self.password)
+            smtp.sendmail(self.fromaddr, self.toaddrs, msg)
+            smtp.quit()
+        except (KeyboardInterrupt, SystemExit) as e:
+            raise e
+        except:
+            self.handleError(record)

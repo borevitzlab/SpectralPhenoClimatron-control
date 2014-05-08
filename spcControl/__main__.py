@@ -9,6 +9,7 @@ import traceback
 from spcControl import (
         get_config_file,
         get_config,
+        get_logger,
         chamber,
         heliospectra,
         email_error,
@@ -164,5 +165,5 @@ def main():
         prev_run_length = time.time() - start
         previous_time = csv_time
 
-if __name__ = "__main__":
+if __name__ == "__main__":
     main()
