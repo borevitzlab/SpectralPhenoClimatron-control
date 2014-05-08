@@ -1,6 +1,7 @@
 *.py[cod]
 *.swp
 *.csv
+tags
 TODO
 .venv
 
