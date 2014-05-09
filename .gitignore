@@ -1,8 +1,10 @@
 *.py[cod]
 *.swp
 *.csv
+tags
 TODO
 .venv
+*.log
 
 # C extensions
 *.so

@@ -1,24 +1,28 @@
-from telnetlib import Telnet
-from spcControl import (get_config, get_config_file)
-from time import sleep
-import re
 from csv import DictWriter
 import datetime
+import logging
 from os import path
+import re
+from telnetlib import Telnet
+from time import sleep
+
+from spcControl import (
+        get_config,
+        get_config_file,
+        )
 
 
 TIMEOUT = 10
+LOG = logging.getLogger("spcControl")
 
 
 def _run(telnet, command, expected):
     """Do the leg work between this and the conviron."""
     config = get_config(get_config_file())
-    if config.getboolean("Global", "Debug"):
-        print("Sending command: ", command.decode())
+    LOG.debug("Sending command:  {0!s}".format(command.decode()))
     telnet.write(command)
     response = telnet.expect([expected,], timeout=TIMEOUT)
-    if config.getboolean("Global", "Debug"):
-        print("Received: ", response[2].decode())
+    LOG.debug("Received:  {0!s}".format(response[2].decode()))
     if response[0] < 0:  # No match found
         raise RuntimeError("Expected response was not received")
     return response
@@ -34,26 +38,23 @@ def _connect(config):
     # Establish connection
     telnet = Telnet(config.get("Conviron", "Host"))
     response = telnet.expect([re.compile(b"login:"),], timeout=TIMEOUT)
-    if config.getboolean("Global", "Debug") > 0:
-        print("Initial response is:", response[2].decode())
+    LOG.debug("Initial response is: {0!s}".format(response[2].decode()))
     if response[0] < 0:  # No match found
         raise RuntimeError("Login prompt was not received")
     # Username
     payload = bytes(config.get("Conviron", "User") + "\n", encoding="UTF8")
     telnet.write(payload)
     response = telnet.expect([re.compile(b"Password:"),], timeout=TIMEOUT)
-    if config.getboolean("Global", "Debug") > 0:
-        print("Sent username:", payload.decode())
-        print("Received:", response[2].decode())
+    LOG.debug("Sent username: {0!s}".format(payload.decode()))
+    LOG.debug("Received: {0!s}".format(response[2].decode()))
     if response[0] < 0:  # No match found
         raise RuntimeError("Password prompt was not received")
     # Password
     payload = bytes(config.get("Conviron", "Password") + "\n", encoding="UTF8")
     telnet.write(payload)
     response = telnet.expect([re.compile(b"#"),], timeout=TIMEOUT)
-    if config.getboolean("Global", "Debug") > 0:
-        print("Send password:", payload.decode())
-        print("Received:", response[2].decode())
+    LOG.debug("Send password: {0!s}".format(payload.decode()))
+    LOG.debug("Received: {}".format(response[2].decode()))
     if response[0] < 0:  # No match found
         raise RuntimeError("Shell prompt was not received")
     return telnet
@@ -167,7 +168,7 @@ def log():
         encoding="UTF8")
     rh_resp = _run(telnet, rh_cmd, re.compile(b"# $"))
     # str should be:
-    # '52 73 \r\n[PS1] # \r\n'
+    # '52 73 \r\n[$PS1] # \r\n'
     # "<actual>SPACE<set>SPACE\r\n..."
     rh_str = rh_resp[2]
     rh, rh_set = rh_str.splitlines()[0].strip().split()
