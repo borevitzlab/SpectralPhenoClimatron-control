@@ -52,7 +52,7 @@ def communicate_line(line):
     timepoint_count += 1
     LOG.debug("Csv line is: {0!s}".format(line))
     now = datetime.datetime.now().strftime("%d/%m/%y %H:%M")
-    log_str = "Running timepoint %i at %s" % (timepoint_count, now)
+    log_str = "Running timepoint {} at {}".format(timepoint_count, now)
     print(log_str, end='... ')
     chamber_num = config.get("Global", "Chamber")
     sys.stdout.flush()  # flush to force buffering, so above is printed
@@ -66,8 +66,8 @@ def communicate_line(line):
         print("Success")
         log_tuple = (chamber_num, "FALSE", log_str)
     except Exception as e:
-        LOG.error(log_str + " FAIL")
         print("FAIL")
+        LOG.error("Could not run timepoint {}".format(timepoint_count))
         traceback_text = traceback.format_exc()
         LOG.debug(traceback_text)
         log_tuple = (chamber_num, "TRUE", "%s\n%s" % (log_str, traceback_text))
@@ -114,7 +114,7 @@ def main():
                     date_time, config.get("Global", "CsvDateFormat"))
         except ValueError:
             LOG.error("There's something wrong with the CSV file.")
-            LOG.error("{0!s} isn't a date in format '{}'!".format(
+            LOG.error("{0!s} isn't a date in format '{1}'!".format(
                 date_time, config.get("Global", "CsvDateFormat")))
             exit(1)
     LOG.debug("First time in file is: {0!s}".format(first_time))
