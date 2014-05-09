@@ -4,6 +4,7 @@
 tags
 TODO
 .venv
+*.log
 
 # C extensions
 *.so
