@@ -1,12 +1,11 @@
 from configparser import ConfigParser
 import logging
+import logging.handlers
 import sys
 import os
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 import smtplib
-
-LOG = get_logger()
 
 
 def get_logger(name="spcControl"):
@@ -76,7 +75,6 @@ def email_error(subject, message, config_file=""):
     """
     if not os.path.exists(config_file):
         config_file = get_config_file()
-
     config = get_config(config_file)
     try:
         msg = MIMEMultipart()
@@ -84,7 +82,6 @@ def email_error(subject, message, config_file=""):
         msg["To"] = config.get("Global", "EmailRecipient")
         msg["Subject"] = subject
         msg.attach(MIMEText(message))
-
         gmail = smtplib.SMTP("smtp.gmail.com", 587)
         gmail.ehlo()
         gmail.starttls()
@@ -101,6 +98,7 @@ def email_error(subject, message, config_file=""):
         gmail.close()
     except:
         pass
+
 
 class TlsSMTPHandler(logging.handlers.SMTPHandler):
     """Shamelessly looted from:
@@ -138,3 +136,6 @@ class TlsSMTPHandler(logging.handlers.SMTPHandler):
             raise e
         except:
             LOG.warn("Could not log via email")
+
+
+LOG = get_logger()

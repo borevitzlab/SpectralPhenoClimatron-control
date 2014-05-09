@@ -1,13 +1,14 @@
 from csv import DictWriter
 import datetime
+import logging
 from os import path
 import re
 from telnetlib import Telnet
 from time import sleep
+
 from spcControl import (
         get_config,
         get_config_file,
-        get_logger,
         )
 
 
@@ -53,7 +54,7 @@ def _connect(config):
     telnet.write(payload)
     response = telnet.expect([re.compile(b"#"),], timeout=TIMEOUT)
     LOG.debug("Send password: {0!s}".format(payload.decode()))
-    LOG.debug("Received: {}".format(response[2].decode())
+    LOG.debug("Received: {}".format(response[2].decode()))
     if response[0] < 0:  # No match found
         raise RuntimeError("Shell prompt was not received")
     return telnet

@@ -1,9 +1,9 @@
+import logging
 from telnetlib import Telnet
 
 from spcControl import (
         get_config,
         get_config_file,
-        get_logger,
         )
 
 

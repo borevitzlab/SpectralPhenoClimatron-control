@@ -1,15 +1,14 @@
 import csv
 import datetime
-from time import strptime, sleep, mktime, time
+import logging
 import socket
 import sys
-import time
+from time import strptime, sleep, mktime, time
 import traceback
 
 from spcControl import (
         get_config_file,
         get_config,
-        get_logger,
         chamber,
         heliospectra,
         email_error,
@@ -80,7 +79,6 @@ def main():
     """Main event loop. This just handles the files, and passes lines to be
     processed to communicate_line()
     """
-
     # open the CSV file, and make the csv reader
     try:
         csv_file = sys.argv[1]
@@ -90,13 +88,12 @@ def main():
         print("Usage:")
         print("\tpython3 -m spcControl <csv_file> [<ini.file>]")
         exit(-1)
-
+    # Prepare the CSV reader
     csv_reader = csv.reader(csv_fh, delimiter=',',
             quoting=csv.QUOTE_NONE)
     # Define these for short/easy reference later
     datefield = config.getint("GlobalCsvFields", "Date")
     timefield = config.getint("GlobalCsvFields", "Time")
-
     # Detect if the file has a header, by trying to get a date and time from
     # the first two field of the first row.
     try:
@@ -142,9 +139,9 @@ def main():
                 date_time, config.get("Global", "CsvDateFormat"))
     # Run the first line
     prev_run_length = 0
-    start = time.time()
+    start = time()
     communicate_line(line)
-    prev_run_length = time.time() - start
+    prev_run_length = time() - start
     previous_time = first_time
     # Loop through the rest of the lines, running each one
     for line in csv_reader:
@@ -160,9 +157,9 @@ def main():
         # And wait that long
         sleep(wait_sec)
         # reset timer and run the line
-        start = time.time()
+        start = time()
         communicate_line(line)
-        prev_run_length = time.time() - start
+        prev_run_length = time() - start
         previous_time = csv_time
 
 if __name__ == "__main__":
