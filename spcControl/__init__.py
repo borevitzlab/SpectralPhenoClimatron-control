@@ -6,6 +6,8 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 import smtplib
 
+LOG = get_logger()
+
 
 def get_logger(name="spcControl"):
     config = get_config(get_config_file())
@@ -106,9 +108,7 @@ class TlsSMTPHandler(logging.handlers.SMTPHandler):
             -use-gmail-smtp-server.txt"
     """
     def emit(self, record):
-        """
-        Emit a record.
-
+        """Emit a record.
         Format the record and send it to the specified addressees.
         """
         try:
@@ -125,7 +125,7 @@ class TlsSMTPHandler(logging.handlers.SMTPHandler):
             msg = self.format(record)
             msg = "From: {}\r\n".format(self.fromaddr)
             msg += "To: {}\r\n".format(",".join(self.toaddrs))
-            msg += "Subject: {}\r\n".format(self.getSubject(record)
+            msg += "Subject: {}\r\n".format(self.getSubject(record))
             msg += "Date: {}\r\n\r\n{}".format(formatdate(), msg)
             if self.username:
                 smtp.ehlo()
@@ -137,4 +137,4 @@ class TlsSMTPHandler(logging.handlers.SMTPHandler):
         except (KeyboardInterrupt, SystemExit) as e:
             raise e
         except:
-            self.handleError(record)
+            LOG.warn("Could not log via email")

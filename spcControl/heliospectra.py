@@ -7,7 +7,7 @@ from spcControl import (
         )
 
 
-LOG = get_logger()
+LOG = logging.getLogger("spcControl")
 
 
 def communicate(line):

@@ -18,7 +18,7 @@ from spcControl import (
 
 timepoint_count = 0
 config = get_config(get_config_file())
-LOG = get_logger()
+LOG = logging.getLogger("spcControl")
 
 
 def _log_to_postgres(log_tuple):
