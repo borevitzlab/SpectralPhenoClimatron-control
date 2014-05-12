@@ -113,9 +113,9 @@ def main():
             first_time = datetime.datetime.strptime(
                     date_time, config.get("Global", "CsvDateFormat"))
         except ValueError:
-            LOG.error("There's something wrong with the CSV file.")
-            LOG.error("{0!s} isn't a date in format '{1}'!".format(
-                date_time, config.get("Global", "CsvDateFormat")))
+            LOG.error("There's something wrong with the CSV file: " +
+                    "{0!s} isn't a date in format '{1}'!".format(
+                    date_time, config.get("Global", "CsvDateFormat")))
             exit(1)
     LOG.debug("First time in file is: {0!s}".format(first_time))
     ## Find current time in CSV file ##
