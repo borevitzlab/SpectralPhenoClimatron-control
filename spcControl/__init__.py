@@ -11,7 +11,8 @@ import smtplib
 def get_logger(name="spcControl"):
     config = get_config(get_config_file())
     # Formattter for both file & stream handlers
-    fmt = logging.Formatter(config.get("Global", "LogFormat"))
+    fmt = logging.Formatter(config.get("Global", "LogFormat"),
+            "%Y-%m-%d %H:%M:%S")
     # Set up a file logger
     fhand = logging.FileHandler(config.get("Global", "Logfile"))
     fhand.setFormatter(fmt)
@@ -24,7 +25,7 @@ def get_logger(name="spcControl"):
     shand.setFormatter(fmt)
     shand.setLevel(logging.ERROR)
     # Email handler for errors
-    email_fmt = logging.Formatter("%(asctime)s %(levelname)s %(message)s")
+    email_fmt = logging.Formatter("%(levelname)s:\r\n%(message)s")
     ehand = TlsSMTPHandler(
             ("smtp.gmail.com", 587),
             config.get("Global", "GmailUser"),
@@ -101,7 +102,7 @@ def email_error(subject, message, config_file=""):
 
 
 class TlsSMTPHandler(logging.handlers.SMTPHandler):
-    """Shamelessly looted from:
+    """Modified from:
     http://mynthon.net/howto/-/python/python%20-%20logging.SMTPHandler-how-to\
             -use-gmail-smtp-server.txt"
     """
@@ -111,26 +112,29 @@ class TlsSMTPHandler(logging.handlers.SMTPHandler):
         """
         try:
             import smtplib
-            import string
             try:
                 from email.utils import formatdate
             except ImportError:
                 formatdate = self.date_time
+            config = get_config(get_config_file())
             port = self.mailport
             if not port:
                 port = smtplib.SMTP_PORT
             smtp = smtplib.SMTP(self.mailhost, port)
-            msg = self.format(record)
-            msg = "From: {}\r\n".format(self.fromaddr)
-            msg += "To: {}\r\n".format(",".join(self.toaddrs))
-            msg += "Subject: {}\r\n".format(self.getSubject(record))
-            msg += "Date: {}\r\n\r\n{}".format(formatdate(), msg)
+            msg = MIMEMultipart()
+            msg["From"] = self.fromaddr
+            msg["To"] = ",".join(self.toaddrs)
+            subject = self.getSubject(record)
+            subject += " (Chamber {})".format(config.get("Global", "Chamber"))
+            msg["Subject"] = subject
+            msg["Date"] = formatdate()
+            msg.attach(MIMEText(self.format(record)))
             if self.username:
                 smtp.ehlo()
                 smtp.starttls()
                 smtp.ehlo()
                 smtp.login(self.username, self.password)
-            smtp.sendmail(self.fromaddr, self.toaddrs, msg)
+            smtp.sendmail(self.fromaddr, self.toaddrs, msg.as_string())
             smtp.quit()
         except (KeyboardInterrupt, SystemExit) as e:
             raise e
