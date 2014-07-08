@@ -1,9 +1,9 @@
 import psycopg2
 import sys
 from spcControl import (
-        email_error,
-        get_config,
-        )
+    email_error,
+    get_config,
+)
 from datetime import datetime
 from time import sleep, timezone
 import traceback
@@ -19,11 +19,11 @@ monitor_config = get_config(monitor_config_file)
 def _poll_database(chamber):
     try:
         con = psycopg2.connect(
-                host=monitor_config.get("Postgres", "Host"),
-                port=monitor_config.getint("Postgres", "Port"),
-                user=monitor_config.get("Postgres", "User"),
-                password=monitor_config.get("Postgres", "Pass"),
-                )
+                               host=monitor_config.get("Postgres", "Host"),
+                               port=monitor_config.getint("Postgres", "Port"),
+                               user=monitor_config.get("Postgres", "User"),
+                               password=monitor_config.get("Postgres", "Pass"),
+        )
         cur = con.cursor()
         statement = monitor_config.get("Postgres", "SelectLogPassesStatement")
         cur.execute(statement, (chamber,))
@@ -31,11 +31,12 @@ def _poll_database(chamber):
         cur.close()
         con.close()
         return result
-    except Exception as e:
+    except Exception:
         traceback_text = traceback.format_exc()
         if monitor_config.getboolean("Monitor", "Debug"):
             print(traceback_text)
-        email_error("Error polling database", traceback_text, monitor_config_file)
+        email_error("Error polling database", traceback_text,
+                    monitor_config_file)
 
 
 def main():
@@ -52,14 +53,13 @@ def main():
     while True:
         offset_min = int(-timezone/60)  # from time import timezone
         local_now = datetime.now().replace(
-                tzinfo=FixedOffsetTimezone(offset=offset_min, name="chamber"),
-                )
+            tzinfo=FixedOffsetTimezone(offset=offset_min, name="chamber"),
+        )
         for chamber, interval in chamber_dict.items():
             result = _poll_database(chamber)
             if result is None:
                 # An error occured in _poll_database, wait 5 sec and retry
-                print("%s: SQL error, retrying" %
-                        (datetime.now().isoformat(),))
+                print("%s: SQL error, retrying" % datetime.now().isoformat())
                 sleep(5)
                 break
             error = None
@@ -69,13 +69,16 @@ def main():
                 sec_since_good_result = time_diff.days * 24 * 60 * 60 + \
                         time_diff.seconds
                 if sec_since_good_result > interval:
-                    error = "Chamber %s FAIL:\nToo long since good ping: %i > %i" % \
-                            (chamber, sec_since_good_result, interval,)
+                    error = "Chamber %s FAIL:\n" % chamber
+                    error += "Too long since good ping: %i > %i" % (
+                        sec_since_good_result, interval,
+                    )
                 else:
                     print("%s: Chamber %s OK" %
-                            (datetime.now().isoformat(), chamber))
+                          (datetime.now().isoformat(), chamber))
             except IndexError:
-                error = "Chamber %s FAIL:\nNo database log records for chamber" % chamber
+                error = "Chamber %s FAIL:\n" % chamber
+                error += "No database log records for chamber"
             if error is not None:
                 print(error)
                 subject = "Conviron monitoring error in chamber %s" % chamber

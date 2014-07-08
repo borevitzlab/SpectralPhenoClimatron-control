@@ -1,3 +1,4 @@
+from __future__ import print_function
 import csv
 import datetime
 import logging
@@ -118,7 +119,7 @@ def main():
                     date_time, config.get("Global", "CsvDateFormat")))
             exit(1)
     LOG.debug("First time in file is: {0!s}".format(first_time))
-    ## Find current time in CSV file ##
+    # Find current time in CSV file
     now = datetime.datetime.now()
     timedelta = datetime.timedelta(minutes=config.getint("Global", "Interval"))
     # Check if file starts too far into the future
