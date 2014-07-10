@@ -1,3 +1,4 @@
+from __future__ import print_function
 from csv import DictWriter
 import datetime
 import logging
@@ -7,9 +8,9 @@ from telnetlib import Telnet
 from time import sleep
 
 from spcControl import (
-        get_config,
-        get_config_file,
-        )
+    get_config,
+    get_config_file,
+)
 
 
 TIMEOUT = 10
@@ -18,7 +19,6 @@ LOG = logging.getLogger("spcControl")
 
 def _run(telnet, command, expected):
     """Do the leg work between this and the conviron."""
-    config = get_config(get_config_file())
     LOG.debug("Sending command:  {0!s}".format(command.decode()))
     telnet.write(command)
     response = telnet.expect([expected,], timeout=TIMEOUT)
@@ -30,11 +30,6 @@ def _run(telnet, command, expected):
 
 def _connect(config):
     """Boilerplate to connect to a conviron."""
-    cmd_str = "%s %s " % (
-            config.get("Conviron", "SetCommand"),
-            config.get("Conviron", "DeviceID")
-            )
-    # # We do the login manually # #
     # Establish connection
     telnet = Telnet(config.get("Conviron", "Host"))
     response = telnet.expect([re.compile(b"login:"),], timeout=TIMEOUT)
@@ -63,10 +58,8 @@ def _connect(config):
 def communicate(line):
     """Communicate config values in csv line to a conviron."""
     config = get_config(get_config_file())
-    cmd_str = "%s %s " % (
-            config.get("Conviron", "SetCommand"),
-            config.get("Conviron", "DeviceID")
-            )
+    cmd_str = "%s %s " % (config.get("Conviron", "SetCommand"),
+                          config.get("Conviron", "DeviceID"))
     # Establish connection
     telnet = _connect(config)
     # Make list for the "Set" part of the communication
@@ -90,12 +83,13 @@ def communicate(line):
         ), encoding="UTF8"))
     if config.getboolean("Conviron", "UseInternalLights"):
         # Append light1 command to list
-        command_list.append(bytes("%s %s %i %i\n" % (
+        cmd = "%s %s %i %i\n" % (
             cmd_str,
             config.get("ConvironDataTypes", "Light1"),
             config.getint("ConvironDataIndicies", "Light1"),
             int(line[config.getint("ConvironCsvFields", "Light1")])
-            ), encoding="UTF8"))
+        )
+        command_list.append(bytes(cmd, encoding="UTF8"))
     # Append teardown commands to command list
     for params in config.get("Conviron", "TearDownSequence").split(","):
         command_list.append(bytes(cmd_str + params + "\n", encoding="UTF8"))
@@ -105,9 +99,9 @@ def communicate(line):
     sleep(2)
     # Clear write flag
     write_flag_command = bytes(
-            cmd_str + config.get("Conviron", "ClearWriteFlagCommand") + "\n",
-            encoding="UTF8"
-            )
+        cmd_str + config.get("Conviron", "ClearWriteFlagCommand") + "\n",
+        encoding="UTF8"
+    )
     _run(telnet, write_flag_command, re.compile(b"#"))
     sleep(2)
     # Make list of Reload command sequences
@@ -123,16 +117,16 @@ def communicate(line):
     sleep(2)
     # Clear write flag
     clear_write_flag_cmd = bytes(
-            cmd_str + config.get("Conviron", "ClearWriteFlagCommand") + "\n",
-            encoding="UTF8"
-            )
+        cmd_str + config.get("Conviron", "ClearWriteFlagCommand") + "\n",
+        encoding="UTF8"
+    )
     _run(telnet, clear_write_flag_cmd, re.compile(b"#"))
     sleep(2)
     # Clear Busy flag
     clear_busy_flag_cmd = bytes(
-            cmd_str + config.get("Conviron", "ClearBusyFlagCommand") + "\n",
-            encoding="UTF8"
-            )
+        cmd_str + config.get("Conviron", "ClearBusyFlagCommand") + "\n",
+        encoding="UTF8"
+    )
     _run(telnet, clear_busy_flag_cmd, re.compile(b"#"))
     sleep(2)
     # Close telnet session
@@ -142,17 +136,15 @@ def communicate(line):
 def log():
     """Get values back from convirons"""
     config = get_config(get_config_file())
-    cmd_str = "%s %s " % (
-            config.get("Conviron", "GetCommand"),
-            config.get("Conviron", "DeviceID")
-            )
+    cmd_str = "%s %s " % (config.get("Conviron", "GetCommand"),
+                          config.get("Conviron", "DeviceID"))
     # Establish connection
     telnet = _connect(config)
     # Get temp
-    temp_cmd = bytes("%s %s\n" % (
-        cmd_str,
-        config.get("Logging", "TempSequence")),
-        encoding="UTF8")
+    temp_cmd = bytes("%s %s\n" %
+        (cmd_str, config.get("Logging", "TempSequence")),
+        encoding="UTF8"
+    )
     temp_resp = _run(telnet, temp_cmd, re.compile(b"# $"))
     # str should be:
     # '123 134 \r\n[PS1] # \r\n'
@@ -162,10 +154,10 @@ def log():
     temp = "{:0.1f}".format(float(temp)/10.0)
     temp_set = "{:0.1f}".format(float(temp_set)/10.0)
     # Get Rel Humidity
-    rh_cmd = bytes("%s %s\n" % (
-        cmd_str,
-        config.get("Logging", "RHSequence")),
-        encoding="UTF8")
+    rh_cmd = bytes("%s %s\n" %
+        (cmd_str, config.get("Logging", "RHSequence")),
+        encoding="UTF8"
+    )
     rh_resp = _run(telnet, rh_cmd, re.compile(b"# $"))
     # str should be:
     # '52 73 \r\n[$PS1] # \r\n'
@@ -175,10 +167,10 @@ def log():
     rh = rh.decode()
     rh_set = rh_set.decode()
     # Get PAR
-    par_cmd = bytes("%s %s\n" % (
-        cmd_str,
-        config.get("Logging", "PARSequence")),
-        encoding="UTF8")
+    par_cmd = bytes("%s %s\n" %
+        (cmd_str, config.get("Logging", "PARSequence")),
+        encoding="UTF8"
+    )
     par_resp = _run(telnet, par_cmd, re.compile(b"# $"))
     # str should be:
     # '123 \r\n[PS1] # \r\n'
@@ -210,6 +202,6 @@ def log():
         "RH": rh,
         "SetRH": rh_set,
         "PAR": par
-        })
+    })
     # close things that need closing
     lfh.close()

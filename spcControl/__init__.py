@@ -1,3 +1,4 @@
+from __future__ import print_function
 from configparser import ConfigParser
 import logging
 import logging.handlers
@@ -26,19 +27,19 @@ def get_logger(name="spcControl"):
     shand.setLevel(logging.ERROR)
     # Email handler for errors
     email_fmt = logging.Formatter("%(levelname)s:\r\n%(message)s")
+    email_to = config.get("Global", "EmailRecipient").strip().split(",")
     ehand = TlsSMTPHandler(
-            ("smtp.gmail.com", 587),
-            config.get("Global", "GmailUser"),
-            config.get("Global", "EmailRecipient").strip().split(","),
-            "spcControl Logging Message",
-            credentials = (
-                config.get("Global", "GmailUser"),
-                config.get("Global", "GmailPass")
-            ))
+                           ("smtp.gmail.com", 587),
+                           config.get("Global", "GmailUser"),
+                           email_to,
+                           "spcControl Logging Message",
+                           credentials = (config.get("Global", "GmailUser"),
+                                          config.get("Global", "GmailPass")),
+    )
     ehand.setFormatter(email_fmt)
     ehand.setLevel(logging.ERROR)
     # Set up logger
-    log = logging.getLogger("spcControl")
+    log = logging.getLogger(name)
     log.addHandler(fhand)
     log.addHandler(shand)
     log.addHandler(ehand)

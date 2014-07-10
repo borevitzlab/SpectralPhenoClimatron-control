@@ -1,3 +1,4 @@
+from __future__ import print_function
 import csv
 import datetime
 import logging
@@ -56,20 +57,26 @@ def communicate_line(line):
     print(log_str, end='... ')
     chamber_num = config.get("Global", "Chamber")
     sys.stdout.flush()  # flush to force buffering, so above is printed
+    step = ""
     try:
-        if config.getboolean("Conviron", "Use"):
-            chamber.communicate(line)
-            chamber.log()
         if config.getboolean("Heliospectra", "Use"):
+            step = "Update Heliospectra Lamps"
             heliospectra.communicate(line)
+        if config.getboolean("Conviron", "Use"):
+            step = "Update Conviron"
+            chamber.communicate(line)
+            step = "Log Conviron Conditions"
+            chamber.log()
         LOG.info(log_str + " Success")
         print("Success")
         log_tuple = (chamber_num, "FALSE", log_str)
     except Exception as e:
         print("FAIL")
-        LOG.error("Could not run timepoint {}".format(timepoint_count))
         traceback_text = traceback.format_exc()
-        LOG.debug(traceback_text)
+        fail_msg = "Step {} Failed with traceback:\n{}".format(step,
+                                                               traceback_text)
+        LOG.error("Could not run timepoint {}\n{}".format(timepoint_count,
+                                                          fail_msg))
         log_tuple = (chamber_num, "TRUE", "%s\n%s" % (log_str, traceback_text))
     if config.getboolean("Postgres", "Use"):
         _log_to_postgres(log_tuple)
@@ -118,7 +125,7 @@ def main():
                     date_time, config.get("Global", "CsvDateFormat")))
             exit(1)
     LOG.debug("First time in file is: {0!s}".format(first_time))
-    ## Find current time in CSV file ##
+    # Find current time in CSV file
     now = datetime.datetime.now()
     timedelta = datetime.timedelta(minutes=config.getint("Global", "Interval"))
     # Check if file starts too far into the future
